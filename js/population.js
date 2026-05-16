@@ -13,9 +13,10 @@ import { ResidenceEffectView} from './views.js'
 /** @typedef {import('./types.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
 /** @typedef {import('./types.js').ResidenceEffect} ResidenceEffect */
 /** @typedef {import('./types.js').Session} Session */
-/** @typedef {import('./types.js').Workforce} Workforce */
 
 var ko = require( "knockout" );
+
+const view = /** @type {any} */ ((/** @type {import('./types.js').AppWindow} */ (/** @type {unknown} */ (window))).view);
 
 export class ResidenceBuilding extends NamedElement {
     /**
@@ -25,31 +26,32 @@ export class ResidenceBuilding extends NamedElement {
      */
     constructor(config, assetsMap, island) {
         super(config);
-        this.island = island;
+        const self = /** @type {this & { island: Island, region: any, existingBuildings: KnockoutObservable<number>, allEffects: Map<any, any>, effectCoverage: KnockoutObservableArray<any>, panoramaCoverage: KnockoutComputed<number>, residentsPerNeed: Map<number, number>, entryCoveragePerProduct: KnockoutComputed<Map<any, Array<any>>>, consumingLimit: KnockoutComputed<number>|null, needsMap: Map<number, Need>|null, residenceNeedsMap: Map<number, ResidenceNeed>|null, residents: KnockoutObservable<number>, residentsSubscription?: KnockoutComputed<number>, populationLevel?: PopulationLevel, guid?: string|number }} */ (this);
+        self.island = island;
 
-        this.region = assetsMap.get(config.region)
+        self.region = /** @type {any} */ (assetsMap.get(Number(config.region)));
 
-        this.existingBuildings = createIntInput(0, 0);
-        this.lockDLCIfSet(this.existingBuildings);
+        self.existingBuildings = createIntInput(0, 0);
+        this.lockDLCIfSet(/** @type {KnockoutObservable<any>} */ (self.existingBuildings));
 
-        this.allEffects = new Map();
-        this.effectCoverage = ko.observableArray([]);
-        this.panoramaCoverage = ko.pureComputed(() => {
+        self.allEffects = new Map();
+        self.effectCoverage = ko.observableArray(/** @type {Array<any>} */ ([]));
+        self.panoramaCoverage = ko.pureComputed(() => {
             var sum = 0;
-            for (/** @type ResidenceEffectCoverage */var effect of this.effectCoverage())
+            for (/** @type {any} */ var effect of self.effectCoverage())
                 if (effect.residenceEffect.panoramaLevel != null)
                     sum += effect.coverage();
             return sum;
         });
 
-        this.residentsPerNeed = new Map();
-        for (var guid in config.residentsPerNeed)
-            this.residentsPerNeed.set(parseInt(guid), config.residentsPerNeed[guid]);
+        self.residentsPerNeed = new Map();
+        for (var guid in /** @type {any} */ (config.residentsPerNeed))
+            self.residentsPerNeed.set(parseInt(guid), /** @type {any} */ (config.residentsPerNeed)[guid]);
 
-        this.entryCoveragePerProduct = ko.pureComputed(() => {
+        self.entryCoveragePerProduct = ko.pureComputed(() => {
             var result = new Map();
-            for (var coverage of this.effectCoverage())
-                for (/** @type {ResidenceEffectCoverage} */var entry of coverage.residenceEffect.entries){
+            for (var coverage of self.effectCoverage())
+                for (/** @type {any} */ var entry of coverage.residenceEffect.entries){
                     if(result.has(entry.product))
                         result.get(entry.product).push(new ResidenceEffectEntryCoverage(coverage, entry))
                     else
@@ -59,51 +61,52 @@ export class ResidenceBuilding extends NamedElement {
             return result;
         });
         
-        this.consumingLimit = null;
-        this.needsMap = null;
-        this.residenceNeedsMap = null;
-        this.residents = ko.observable(0);
+        self.consumingLimit = null;
+        self.needsMap = null;
+        self.residenceNeedsMap = null;
+        self.residents = ko.observable(0);
     }
 
     /**
         * @param {Map<number, Need>} needsMap
      */
     initializeNeeds(needsMap){
-        this.needsMap = needsMap;
-        this.consumingLimit = ko.pureComputed(() => {
+        const self = /** @type {this & { needsMap: Map<number, Need>, consumingLimit: KnockoutComputed<number>, existingBuildings: KnockoutObservable<number>, residentsPerNeed: Map<number, number>, residenceNeedsMap: Map<number, ResidenceNeed>, residents: KnockoutObservable<number> }} */ (this);
+        self.needsMap = needsMap;
+        self.consumingLimit = ko.pureComputed(() => {
             var sum = 0;
-            for (var n of this.needsMap.values()){
+            for (var n of self.needsMap.values()){
                 if(!n.available() || n.excludePopulationFromMoneyAndConsumptionCalculation)
                     continue;
 
-                sum += this.existingBuildings() * (this.residentsPerNeed.get(n.guid) || 0);
+                sum += self.existingBuildings() * (self.residentsPerNeed.get(/** @type {any} */ (n).guid) || 0);
                 
 
-                for (/** @type [ResidenceEffectEntryCoverage] */ const entry of this.getConsumptionEntries(n))
-                    sum += this.existingBuildings() * entry.getResidents();
+                for (/** @type [ResidenceEffectEntryCoverage] */ const entry of self.getConsumptionEntries(n))
+                    sum += self.existingBuildings() * entry.getResidents();
 
             }
 
             return sum;
         });
 
-        this.residenceNeedsMap = new Map();
-        this.residentsPerNeed.forEach((_, guid) => {
-            var n = this.needsMap.get(guid); // some residence needs come from buff but have no need in population level
+        self.residenceNeedsMap = new Map();
+        self.residentsPerNeed.forEach((_, guid) => {
+            var n = self.needsMap.get(guid); // some residence needs come from buff but have no need in population level
             if(n)
-                this.residenceNeedsMap.set(guid, new ResidenceNeed(this, n));
+                self.residenceNeedsMap.set(guid, new ResidenceNeed(self, n));
         });
 
-        this.residenceNeedsMap.forEach(n => n.initDependencies(this.residenceNeedsMap));
-        this.residentsSubscription = ko.computed(() => {
+        self.residenceNeedsMap.forEach(n => n.initDependencies(self.residenceNeedsMap));
+        self.residentsSubscription = ko.computed(() => {
             var sum = 0;
-            for (var n of this.residenceNeedsMap.values()) {
+            for (var n of self.residenceNeedsMap.values()) {
                 if (!n.residents)
                     console.log(n);
                 sum += n.residents();
             }
 
-            this.residents(sum);
+            self.residents(sum);
         });
     }
 

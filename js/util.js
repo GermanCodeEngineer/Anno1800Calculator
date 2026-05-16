@@ -5,10 +5,18 @@
 /** @typedef {import('./types.js').InputTransformCallback} InputTransformCallback */
 /** @typedef {import('./types.js').ParamsObject} ParamsObject */
 /** @typedef {import('./types.js').AppWindow} AppWindow */
+/** @typedef {ConfigObject & { iconPath?: string, dlcs?: Array<string|number|DLC>, locaText?: Record<string, string>, icon?: string, available?: unknown, dlcLockingObservables?: Array<KnockoutObservable<unknown>>, name?: string|(() => string) }} NamedElementConfig */
+/** @typedef {{ obs: KnockoutObservable<number|string>, id: string|number }} NumberInputParams */
+/** @typedef {{ max?: number, min?: number, step?: number, length?: number, on: (event: string, handler: (evt: unknown) => void) => void, get: (index: number) => unknown, attr: (name: string) => string|undefined }} NumberInputElement */
+/** @typedef {{ precision?: number, min?: number, max?: number, callback?: InputTransformCallback }} NumericBounds */
 
 var ko = require( "knockout" );
 
-const appWindow = /** @type {AppWindow} */ (window);
+const appWindow = /** @type {AppWindow} */ (/** @type {unknown} */ (window));
+const view = appWindow.view;
+const params = /** @type {AppWindow['params'] & { icons?: Record<string, string>, dlcs?: Record<string, DLC> }} */ (appWindow.params);
+const globalObject = /** @type {{ $?: any }} */ (/** @type {unknown} */ (globalThis));
+const $ = /** @type {any} */ (globalObject.$);
 
 export let versionCalculator = "v11.1";
 export let isPreview = false;
@@ -21,12 +29,12 @@ export let ALL_ISLANDS = "All Islands";
  */
 export function setDefaultFixedFactories(assetsMap) {
     // Default rum, cotton fabric and coffee to the new world production
-    assetsMap.get(1010240).fixedFactory(assetsMap.get(1010318));
-    assetsMap.get(1010257).fixedFactory(assetsMap.get(1010340));
-    assetsMap.get(120032).fixedFactory(assetsMap.get(101252));
-    assetsMap.get(1010216).fixedFactory(assetsMap.get(1010294));
-    assetsMap.get(1010214).fixedFactory(assetsMap.get(1010292));
-    assetsMap.get(1010206).fixedFactory(assetsMap.get(1010284));
+    /** @type {any} */ (assetsMap.get(1010240)).fixedFactory(assetsMap.get(1010318));
+    /** @type {any} */ (assetsMap.get(1010257)).fixedFactory(assetsMap.get(1010340));
+    /** @type {any} */ (assetsMap.get(120032)).fixedFactory(assetsMap.get(101252));
+    /** @type {any} */ (assetsMap.get(1010216)).fixedFactory(assetsMap.get(1010294));
+    /** @type {any} */ (assetsMap.get(1010214)).fixedFactory(assetsMap.get(1010292));
+    /** @type {any} */ (assetsMap.get(1010206)).fixedFactory(assetsMap.get(1010284));
 }
 
 /**
@@ -44,7 +52,7 @@ var formater = new Intl.NumberFormat(navigator.language || "en").format;
  * @param {boolean} forceSign
  */
 export function formatNumber(num, forceSign = false) {
-    var rounded = Math.ceil(100 * parseFloat(num)) / 100;
+    var rounded = Math.ceil(100 * parseFloat(String(num))) / 100;
     if (Math.abs(rounded) < EPSILON)
         rounded = 0;
     var str = formater(rounded);
@@ -55,36 +63,36 @@ export function formatNumber(num, forceSign = false) {
 
 export class NumberInputHandler {
     /**
-     * @param {ParamsObject} params
+     * @param {NumberInputParams} params
      */
     constructor(params) {
         this.obs = params.obs;
         this.id = params.id;
-        this.max = parseFloat($('#' + this.id).attr('max') || Infinity);
-        this.min = parseFloat($('#' + this.id).attr('min') || -Infinity);
-        this.step = parseFloat($('#' + this.id).attr('step') || 1);
-        this.input = $('#' + this.id);
+        this.input = /** @type {any} */ ($('#' + this.id));
+        this.max = parseFloat(this.input.attr('max') || String(Infinity));
+        this.min = parseFloat(this.input.attr('min') || String(-Infinity));
+        this.step = parseFloat(this.input.attr('step') || '1');
         if (this.input.length != 1)
             console.log("Invalid binding", this.id, this.input);
-        this.input.on("wheel", evt => {
+        this.input.on("wheel", /** @type {(evt: any) => void} */ ((evt) => {
             if (document.activeElement !== this.input.get(0))
                 return;
 
             evt.preventDefault();
-            var deltaY = evt.deltaY || (evt.originalEvent || {}).deltaY;
+            var deltaY = evt.deltaY || (evt.originalEvent || {}).deltaY || 0;
             var sign = -Math.sign(deltaY);
             var factor = this.getInputFactor(evt);
 
-            var val = parseFloat(this.obs()) + sign * factor * this.step + ACCURACY;
+            var val = parseFloat(String(this.obs())) + sign * factor * this.step + ACCURACY;
             val = Math.max(this.min, Math.min(this.max, val));
             this.obs(Math.floor(val / this.step) * this.step);
 
             return false;
-        });
+        }));
     }
 
     /**
-     * @param {Event} evt
+        * @param {{ ctrlKey?: boolean, shiftKey?: boolean }} evt
      */
     getInputFactor(evt) {
         var factor = 1
@@ -101,7 +109,7 @@ export class NumberInputHandler {
  * @param {boolean} forceSign
  */
 export function formatPercentage(number, forceSign = true) {
-    return appWindow.formatNumber(Math.ceil(10 * parseFloat(number)) / 10, forceSign) + ' %';
+    return appWindow.formatNumber(Math.ceil(10 * parseFloat(String(number))) / 10, forceSign) + ' %';
 }
 
 /**
@@ -110,15 +118,17 @@ export function formatPercentage(number, forceSign = true) {
  * @param {T} val
  */
 export function delayUpdate(obs, val) {
-    var version = obs.getVersion ? obs.getVersion() : obs();
+    const typedObs = /** @type {any} */ (obs);
+    var version = typedObs.getVersion ? typedObs.getVersion() : typedObs();
     setTimeout(() => {
-        if (obs.getVersion && !obs.hasChanged(version) || version === obs())
-            obs(val);
+        if (typedObs.getVersion && !typedObs.hasChanged(version) || version === typedObs())
+            typedObs(val);
     });
 }
 
 // from https://knockoutjs.com/documentation/extenders.html
-ko.extenders.numeric = function (target, bounds) {
+/** @type {(target: KnockoutObservable<number|string>, bounds: NumericBounds) => KnockoutComputed<number|string>} */
+const numericExtender = function (target, bounds) {
     //create a writable computed observable to intercept writes to our observable
     var result = ko.computed({
         read: target,  //always return the original observables value
@@ -127,15 +137,17 @@ ko.extenders.numeric = function (target, bounds) {
          */
         write: function (newValue) {
             var current = target();
+            const max = bounds.max ?? Infinity;
+            const min = bounds.min ?? -Infinity;
 
             if (bounds.precision === 0)
-                var valueToWrite = parseInt(newValue);
+                var valueToWrite = parseInt(String(newValue));
             else if (bounds.precision) {
                 var roundingMultiplier = Math.pow(10, bounds.precision);
-                var newValueAsNum = isNaN(newValue) ? 0 : +newValue;
+                var newValueAsNum = isNaN(Number(newValue)) ? 0 : Number(newValue);
                 var valueToWrite = Math.round(newValueAsNum * roundingMultiplier) / roundingMultiplier;
             } else {
-                var valueToWrite = parseFloat(newValue);
+                var valueToWrite = parseFloat(String(newValue));
             }
 
             if (!isFinite(valueToWrite) || valueToWrite == null) {
@@ -145,28 +157,33 @@ ko.extenders.numeric = function (target, bounds) {
                 return;
             }
 
-            if (valueToWrite > bounds.max)
-                valueToWrite = bounds.max;
+            if (valueToWrite > max)
+                valueToWrite = max;
 
-            if (valueToWrite < bounds.min)
-                valueToWrite = bounds.min;
+            if (valueToWrite < min)
+                valueToWrite = min;
 
             if (bounds.callback && typeof bounds.callback === "function") {
-                valueToWrite = bounds.callback(valueToWrite, current, newValue);
+                const callbackValue = bounds.callback(Number(valueToWrite), Number(current), newValue);
+                if (callbackValue == null)
+                    return;
+
+                valueToWrite = callbackValue;
                 if (valueToWrite == null)
                     return;
             }
 
             //only write if it changed
             if (valueToWrite !== current || newValue !== valueToWrite) {
-                if (result._state && result._state.isBeingEvaluated) {
+                const resultState = /** @type {any} */ (result);
+                if (resultState._state && resultState._state.isBeingEvaluated) {
                     console.log("cycle detected, propagation stops");
                     return;
                 }
 
                 target(valueToWrite);
                 if (newValue !== valueToWrite)
-                    target.valueHasMutated()
+                    /** @type {any} */ (target).valueHasMutated();
             }
         }
     }).extend({ notify: 'always' });
@@ -177,6 +194,8 @@ ko.extenders.numeric = function (target, bounds) {
     //return the new computed observable
     return result;
 };
+
+/** @type {any} */ (ko.extenders).numeric = numericExtender;
 
 /**
  * @param {number} init
@@ -214,28 +233,32 @@ export function createFloatInput(init, min = -Infinity, max = Infinity, callback
 
 export class NamedElement {
     /**
-     * @param {ConfigObject} config
+     * @param {NamedElementConfig} config
      */
     constructor(config) {
         $.extend(this, config);
-        this.locaText = this.locaText || {}
+        const namedElement = /** @type {NamedElementConfig & { locaText: Record<string, string>, dlcs?: Array<string|number> | Array<DLC>, iconPath?: string, icon?: string, available?: unknown, dlcLockingObservables?: Array<KnockoutObservable<unknown>> }} */ (this);
+        namedElement.locaText = /** @type {Record<string, string>} */ (namedElement.locaText || {});
         this.name = ko.computed(() => {
 
-            let text = this.locaText[view.settings.language()];
+            let text = namedElement.locaText[view.settings.language()];
             if (text)
                 return text;
 
-            text = this.locaText["english"];
+            text = namedElement.locaText["english"];
             return text ? text : config.name;
         });
 
-        if (this.iconPath && params && params.icons)
-            this.icon = params.icons[this.iconPath];
+        if (namedElement.iconPath && params && params.icons)
+            namedElement.icon = params.icons[namedElement.iconPath];
 
-        if (this.dlcs && params && params.dlcs) {
-            this.dlcs = this.dlcs.map(d => view.dlcsMap.get(d)).filter(d => d);
+        if (namedElement.dlcs && params && params.dlcs) {
+            namedElement.dlcLockingObservables = [];
+            const dlcs = namedElement.dlcs;
+            const resolvedDlcs = /** @type {Array<DLC>} */ (dlcs.map((d) => view.dlcsMap.get(String(d))).filter((d) => d != null));
+            namedElement.dlcs = resolvedDlcs;
             this.available = ko.pureComputed(() => {
-                for (var d of this.dlcs) {
+                for (var d of resolvedDlcs) {
                     if (d.checked())
                         return true;
                 }
@@ -253,19 +276,25 @@ export class NamedElement {
      * @param {KnockoutObservable<unknown>} obs
      */
     lockDLCIfSet(obs) {
-        if (this.dlcs == null || this.dlcs.length != 1)
+        const namedElement = /** @type {NamedElementConfig & { dlcs?: Array<DLC>, dlcLockingObservables?: Array<KnockoutObservable<unknown>> }} */ (this);
+        const dlcs = /** @type {Array<DLC> | undefined} */ (namedElement.dlcs);
+        if (dlcs == null || dlcs.length != 1)
             return;
 
-        this.dlcLockingObservables.push(obs);
-        this.dlcs[0].addDependentObject(obs);
+        if (!namedElement.dlcLockingObservables)
+            namedElement.dlcLockingObservables = [];
+        namedElement.dlcLockingObservables.push(obs);
+        dlcs[0].addDependentObject(obs);
     }
 
     delete() {
-        if (this.dlcs == null || this.dlcs.length != 1)
+        const namedElement = /** @type {NamedElementConfig & { dlcs?: Array<DLC>, dlcLockingObservables?: Array<KnockoutObservable<unknown>> }} */ (this);
+        const dlcs = /** @type {Array<DLC> | undefined} */ (namedElement.dlcs);
+        if (dlcs == null || dlcs.length != 1)
             return;
 
-        for (var obs of this.dlcLockingObservables)
-            this.dlcs[0].removeDependentObject(obs);
+        for (const obs of namedElement.dlcLockingObservables || [])
+            dlcs[0].removeDependentObject(obs);
     }
 }
 
@@ -287,10 +316,10 @@ export class DLC extends Option {
     constructor(config) {
         super(config);
 
-        this.dependentObjects = ko.observableArray([]).extend({ deferred: true }); // notify subscribers at most once per 500 ms
+        this.dependentObjects = /** @type {KnockoutObservableArray<KnockoutObservable<unknown>>} */ (/** @type {unknown} */ (ko.observableArray(/** @type {Array<KnockoutObservable<unknown>>} */ ([])).extend({ deferred: true }))); // notify subscribers at most once per 500 ms
 
         this.used = ko.pureComputed(() => {
-            for (var obs of this.dependentObjects())
+            for (const obs of this.dependentObjects())
                 if (obs() != 0) // can be int, float or bool -> non-strict comparison
                     return true;
 

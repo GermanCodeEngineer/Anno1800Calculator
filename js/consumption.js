@@ -7,15 +7,17 @@ import { PopulationLevel, ResidenceBuilding } from './population.js';
 /** @typedef {import('./types.js').ConfigObject} ConfigObject */
 /** @typedef {import('./types.js').Island} Island */
 /** @typedef {import('./types.js').ListObject} ListObject */
-/** @typedef {import('./types.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
-/** @typedef {import('./types.js').PopulationNeed} PopulationNeed */
-/** @typedef {import('./types.js').ResidenceEffect} ResidenceEffect */
-/** @typedef {import('./types.js').ResidenceEffectCoverage} ResidenceEffectCoverage */
 /** @typedef {import('./types.js').AppWindow} AppWindow */
+
+/** @typedef {{ articleEffects: Array<{ ArticleValue: number }>, guid: string }} NewspaperEntryConfig */
+/** @typedef {{ guid: string|number, residents: number, consumptionModifier: number, suppliedBy: Array<string|number> }} ResidenceEffectEntryData */
+/** @typedef {{ effects: Array<ConfigObject>, residences: Array<string|number>, panoramaLevel?: number }} ResidenceEffectConfig */
+/** @typedef {{ populationLevel: string|number, amount: number }} UnlockCondition */
 
 var ko = require("knockout");
 
-const appWindow = /** @type {AppWindow} */ (window);
+const appWindow = /** @type {AppWindow} */ (/** @type {unknown} */ (window));
+const view = /** @type {any} */ (appWindow.view);
 
 export class Need extends Demand {
     /**
@@ -36,18 +38,17 @@ export class ResidenceNeed {
      */
     constructor(residence, need) {
         this.residence = residence;
-        this.need = need;
+        this.need = /** @type {PopulationNeed & {guid: number|string, tpmin: number, checked: () => boolean, addResidenceNeed: (need: ResidenceNeed) => void, isInactive: () => boolean, banned: () => boolean}} */ (/** @type {unknown} */ (need));
+        const typedResidence = /** @type {ResidenceBuilding & {consumingLimit: () => number}} */ (/** @type {unknown} */ (this.residence));
         
         this.substitution = ko.observable(0);
         this.fulfillment = ko.observable(this.need.checked() ? 1 : 0);
 
-        if(this.need.amount){
-            this.amount = ko.pureComputed(() => {
-                var newspaper = (100 + appWindow.view.newspaperConsumption.amount()) / 100;
-                var total = this.residence.consumingLimit() * this.need.tpmin * newspaper;
-                return total * (Math.max(0, this.fulfillment() - this.substitution()));
-            });
-        }
+        this.amount = ko.pureComputed(() => {
+            var newspaper = (100 + view.newspaperConsumption.amount()) / 100;
+            var total = typedResidence.consumingLimit() * this.need.tpmin * newspaper;
+            return total * (Math.max(0, this.fulfillment() - this.substitution()));
+        });
 
         this.need.addResidenceNeed(this);
 
@@ -55,7 +56,7 @@ export class ResidenceNeed {
             var sum = this.residence.residentsPerNeed.get(this.need.guid) || 0;
             for (var c of this.residence.getConsumptionEntries(this.need)) {
                 var coverage = c.residenceEffectCoverage.coverage();
-                sum += coverage * (c.residenceEffectEntry.residents || 0);
+                sum += coverage * Number(c.residenceEffectEntry.residents || 0);
             }
             return sum;
         });
@@ -64,7 +65,7 @@ export class ResidenceNeed {
             var sum = this.residence.existingBuildings() * (this.residence.residentsPerNeed.get(this.need.guid) || 0);
             for (var c of this.residence.getConsumptionEntries(this.need)) {
                 var coverage = c.residenceEffectCoverage.coverage();
-                sum += Math.round(coverage * this.residence.existingBuildings()) *(c.residenceEffectEntry.residents || 0);
+                sum += Math.round(coverage * this.residence.existingBuildings()) * Number(c.residenceEffectEntry.residents || 0);
             }
             return Math.floor(sum * this.fulfillment());
         })
@@ -80,14 +81,16 @@ export class ResidenceNeed {
             var arr = this.residence.getConsumptionEntries(this.need);
             if(arr == null)
                 return; // no effect for this product
+            if (!this.residenceNeedsMap)
+                return;
             
             var suppliedByFulfillment = 0;
             var modifier = 0;
             for (var c of arr){
                 var coverage = c.residenceEffectCoverage.coverage();
-                modifier += c.residenceEffectEntry.consumptionModifier * coverage;
-                for (/** @type Product */var p of c.residenceEffectEntry.suppliedBy){
-                    var n = this.residenceNeedsMap.get(p.guid);
+                modifier += Number(c.residenceEffectEntry.consumptionModifier || 0) * coverage;
+                for (var p of /** @type {Array<{ guid: string|number }>} */ (c.residenceEffectEntry.suppliedBy)){
+                    var n = this.residenceNeedsMap.get(Number(p.guid));
 
                     if(n != null)
                         suppliedByFulfillment = Math.max(suppliedByFulfillment, coverage * n.fulfillment())
@@ -121,13 +124,15 @@ export class PublicBuildingNeed extends Option {
     constructor(config, level, assetsMap) {
         super(config);
 
-        this.level = level;
+        const self = /** @type {this & { guid: string|number, level: PopulationLevel, product: any, checked: KnockoutObservable<boolean> }} */ (this);
 
-        this.checked(true);
+        self.level = /** @type {any} */ (level);
 
-        this.product = assetsMap.get(this.guid);
-        if (!this.product)
-            throw `No Product ${this.guid}`;
+        self.checked(true);
+
+        self.product = /** @type {any} */ (assetsMap.get(Number(self.guid)));
+        if (!self.product)
+            throw `No Product ${self.guid}`;
 
         PopulationNeed.prototype.initHidden.bind(this)(assetsMap);
         this.initBans = PopulationNeed.prototype.initBans;
@@ -142,21 +147,22 @@ export class NoFactoryNeed extends PublicBuildingNeed {
      */
     constructor(config, level, assetsMap) {
         super(config, level, assetsMap);
-        this.level = level;
-        this.isNoFactoryNeed = true;
+        const self = /** @type {this & { level: PopulationLevel, isNoFactoryNeed: boolean, amount: KnockoutObservable<number>, residentsInputFactor: number, factor?: number, residentsInput?: KnockoutComputed<number>, product: { addNeed: (need: unknown) => void } }} */ (this);
+        self.level = /** @type {any} */ (level);
+        self.isNoFactoryNeed = true;
 
-        this.amount = ko.observable(0);
-        if (this.factor == null)
-            this.factor = 1;
+        self.amount = ko.observable(0);
+        if (self.factor == null)
+            self.factor = 1;
        
 
-        this.residentsInput = ko.pureComputed(() => {
-            return this.amount() * this.residentsInputFactor;
+        self.residentsInput = ko.pureComputed(() => {
+            return self.amount() * self.residentsInputFactor;
         });
 
         PopulationNeed.prototype.initAggregation.bind(this)(assetsMap);
 
-        this.product.addNeed(this);
+        self.product.addNeed(this);
     }
 }
 
@@ -168,11 +174,12 @@ export class PopulationNeed extends Need {
      */
     constructor(config, level, assetsMap) {
         super(config, assetsMap);
-        this.level = level;
+        const self = /** @type {this & { level: PopulationLevel & { guid: string|number, residence: any, residents: () => number, allResidences: Array<any> }, residentsUnlockCondition: number, unlockCondition?: { populationLevel: string|number, amount: number } }} */ (this);
+        self.level = /** @type {any} */ (level);
 
-        this.residentsUnlockCondition = 0;
-        if (this.unlockCondition && this.unlockCondition.populationLevel == level.guid)
-            this.residentsUnlockCondition = this.unlockCondition.amount;
+        self.residentsUnlockCondition = 0;
+        if (self.unlockCondition && self.unlockCondition.populationLevel == Number(self.level.guid))
+            self.residentsUnlockCondition = self.unlockCondition.amount;
 
         this.initHidden(assetsMap);
         this.initAggregation(assetsMap);
@@ -182,36 +189,37 @@ export class PopulationNeed extends Need {
      * @param {AssetsMap} assetsMap
      */
     initHidden(assetsMap){
-        this.banned = ko.observable(false);
-        this.isInactive = ko.observable(false);
+        const self = /** @type {this & { available: () => boolean, banned: KnockoutObservable<boolean>, isInactive: KnockoutObservable<boolean>, requiredBuildings?: Array<string|number>, residences?: Array<any>, level: PopulationLevel, residenceNeeds: KnockoutObservableArray<ResidenceNeed>, addResidenceNeed: (need: ResidenceNeed) => void, totalResidents?: KnockoutComputed<number>, hidden?: KnockoutComputed<boolean> }} */ (this);
+        self.banned = ko.observable(false);
+        self.isInactive = ko.observable(false);
 
-        if (this.requiredBuildings) {
-            this.residences = this.requiredBuildings.map(r => assetsMap.get(r));
+        if (self.requiredBuildings) {
+            self.residences = self.requiredBuildings.map((r) => assetsMap.get(Number(r)));
 
-            this.hidden = ko.computed(() => {
-                if (!this.available())
+            self.hidden = ko.computed(() => {
+                if (!self.available())
                     return true;
 
-                for (var r of this.residences)
-                    if (r.existingBuildings() > 0 || this.level.residence == r)
+                for (var r of self.residences || [])
+                    if (r.existingBuildings() > 0 || self.level.residence == r)
                         return false;
 
                 return true;
             });
         } else {
-            this.hidden = ko.computed(() => !this.available());
-            this.residences = this.level.allResidences;
+            self.hidden = ko.computed(() => !self.available());
+            self.residences = self.level.allResidences;
         }
 
-        this.residenceNeeds = ko.observableArray([]);
+        self.residenceNeeds = ko.observableArray(/** @type {Array<ResidenceNeed>} */ ([]));
 
-        this.addResidenceNeed = function (need) {
-            this.residenceNeeds.push(need);
+        self.addResidenceNeed = function (need) {
+            self.residenceNeeds.push(need);
         }
 
-        this.totalResidents = ko.pureComputed(() => {
+        self.totalResidents = ko.pureComputed(() => {
             var sum = 0;
-            for (var n of this.residenceNeeds()) {
+            for (var n of self.residenceNeeds()) {
                 sum += n.residents();
             }
 
@@ -223,18 +231,20 @@ export class PopulationNeed extends Need {
      * @param {AssetsMap} assetsMap
      */
     initAggregation(assetsMap) {
-        this.region = this.level.region;        
+        const self = /** @type {this & { level: PopulationLevel, checked: KnockoutObservable<boolean>, amount: KnockoutObservable<number>, notes: KnockoutObservable<string>, region: any, residenceNeeds: KnockoutObservableArray<ResidenceNeed>, residenceNeedsSubscription?: KnockoutComputed<number> }} */ (this);
+        self.region = self.level.region;        
 
-        this.checked = ko.observable(true);
+        self.checked = ko.observable(true);
 
-        this.notes = ko.observable("");   
+        self.notes = ko.observable("");   
 
-        this.residenceNeedsSubscription = ko.computed(() => {
+        self.residenceNeedsSubscription = ko.computed(() => {
             var sum = 0;
-            for (var n of this.residenceNeeds())
+            for (var n of self.residenceNeeds())
                 sum += n.amount();
 
-            this.amount(sum);
+            self.amount(sum);
+            return sum;
         });
 
     }
@@ -244,24 +254,26 @@ export class PopulationNeed extends Need {
      * @param {AssetsMap} assetsMap
      */
     initBans(level, assetsMap) {
-        if (this.unlockCondition) {
-            var config = this.unlockCondition;
-            this.locked = ko.computed(() => {
+        const self = /** @type {this & { checked: KnockoutObservable<boolean>, banned: KnockoutObservable<boolean>, isInactive: KnockoutObservable<boolean>, locked?: KnockoutComputed<boolean>, unlockCondition?: { populationLevel: string|number, amount: number }, bannedSubscription?: KnockoutComputed<boolean> }} */ (this);
+        if (self.unlockCondition) {
+            var config = self.unlockCondition;
+            self.locked = ko.computed(() => {
                 if (!config || !view.settings.needUnlockConditions.checked())
                     return false;
 
                 if (level.skyscraperLevels && level.hasSkyscrapers())
                     return false;
 
-                if (config.populationLevel != level.guid) {
-                    var l = assetsMap.get(config.populationLevel);
+                const levelWithGuid = /** @type {any} */ (level);
+                if (config.populationLevel != Number(levelWithGuid.guid)) {
+                    var l = /** @type {any} */ (assetsMap.get(Number(config.populationLevel)));
                     return l.residents() < config.amount;
                 }
 
                 if (level.residents() >= config.amount)
                     return false;
 
-                var residence = level.residence.upgradedBuilding;
+                var residence = /** @type {any} */ (level.residence).upgradedBuilding;
                 while (residence) {
                     var l = residence.populationLevel;
                     var amount = l.residents();
@@ -274,14 +286,14 @@ export class PopulationNeed extends Need {
                 return true;
             }).extend({ deferred: true }); // deferred necessary for updating population level residents
 
-            this.isInactive(this.locked());
-            this.locked.subscribe(locked => this.isInactive(locked));
+            self.isInactive(self.locked());
+            self.locked.subscribe((locked) => self.isInactive(locked));
         }
 
-        this.bannedSubscription = ko.computed(() => {
-            var checked = this.checked();
-            this.banned(!checked || this.locked && this.locked());
-        });
+        self.bannedSubscription = /** @type {KnockoutComputed<boolean>} */ (/** @type {unknown} */ (ko.computed(() => {
+            var checked = self.checked();
+            return self.banned(!!(!checked || self.locked && self.locked()));
+        })));
 
     }
 
@@ -294,7 +306,7 @@ export class PopulationNeed extends Need {
 export class NewspaperNeedConsumption {
     constructor() {
         this.selectedEffects = ko.observableArray();
-        this.allEffects = [];
+        this.allEffects = /** @type {Array<ResidenceEffect | NewspaperNeedConsumptionEntry>} */ ([]);
         this.amount = ko.observable(100);
         this.selectedBuff = ko.observable(0);
         this.selectableBuffs = ko.observableArray();
@@ -311,7 +323,7 @@ export class NewspaperNeedConsumption {
         this.amount = ko.computed(() => {
             var sum = 0;
             for (var effect of this.selectedEffects()) {
-                sum += Math.ceil(effect.amount * (1 + parseInt(this.selectedBuff()) / 100));
+                sum += Math.ceil(effect.amount * (1 + parseInt(String(this.selectedBuff())) / 100));
             }
 
             return sum;
@@ -323,7 +335,7 @@ export class NewspaperNeedConsumption {
      */
     add(effect) {
         this.allEffects.push(effect);
-        effect.checked.subscribe(checked => {
+        /** @type {NewspaperNeedConsumptionEntry} */ (effect).checked.subscribe((checked) => {
             var idx = this.selectedEffects.indexOf(effect);
             if (checked && idx != -1 || !checked && idx == -1)
                 return;
@@ -372,9 +384,9 @@ export class NewspaperNeedConsumptionEntry extends Option {
     constructor(config) {
         super(config);
 
-        this.lockDLCIfSet(this.checked);
+        this.lockDLCIfSet(/** @type {KnockoutObservable<any>} */ (this.checked));
 
-        this.amount = config.articleEffects[0].ArticleValue;
+        this.amount = /** @type {NewspaperEntryConfig} */ (config).articleEffects[0].ArticleValue;
 
         this.visible = ko.pureComputed(() => this.available())
     }
@@ -386,11 +398,12 @@ class ResidenceEffectEntry {
      * @param {AssetsMap} assetsMap
      */
     constructor(config, assetsMap) {
-        this.guid = parseInt(config.guid);
+        const entry = /** @type {ResidenceEffectEntryData} */ (config);
+        this.guid = parseInt(String(entry.guid));
         this.product = assetsMap.get(this.guid);
-        this.consumptionModifier = config.consumptionModifier;
-        this.residents = config.residents;
-        this.suppliedBy = config.suppliedBy.map(e => assetsMap.get(e));
+        this.consumptionModifier = entry.consumptionModifier;
+        this.residents = entry.residents;
+        this.suppliedBy = entry.suppliedBy.map((/** @type {string|number} */ e) => assetsMap.get(Number(e)));
     }
 }
 
@@ -401,7 +414,8 @@ export class ResidenceEffect extends NamedElement {
      */
     constructor(config, assetsMap) {
         super(config);
-        this.entries = config.effects.map(e => new ResidenceEffectEntry(e, assetsMap));
+        const effectConfig = /** @type {ResidenceEffectConfig} */ (config);
+        this.entries = effectConfig.effects.map((/** @type {ConfigObject} */ e) => new ResidenceEffectEntry(e, assetsMap));
         this.effectsPerNeed = new Map();
 
         for (var effect of this.entries) {
@@ -409,8 +423,8 @@ export class ResidenceEffect extends NamedElement {
         }
 
         this.residences = [];
-        for (var residence of config.residences) {
-            let r = assetsMap.get(residence);
+        for (var residence of effectConfig.residences) {
+            let r = /** @type {any} */ (assetsMap.get(Number(residence)));
             this.residences.push(r);
             r.addEffect(this);
         }
@@ -421,16 +435,20 @@ export class ResidenceEffect extends NamedElement {
      * @param {ResidenceEffect} other
      */
     compare(other) {
-        if (this.panoramaLevel != null && other.panoramaLevel != null)
-            return 10 * (other.residences[0].populationLevel.guid - this.residences[0].populationLevel.guid) + other.panoramaLevel - this.panoramaLevel;
+        const self = /** @type {ResidenceEffect & { panoramaLevel?: number, residences: Array<{ populationLevel: { guid: string|number } }> }} */ (this);
+        const otherEffect = /** @type {ResidenceEffect & { panoramaLevel?: number, residences: Array<{ populationLevel: { guid: string|number } }> }} */ (other);
+        if (self.panoramaLevel != null && otherEffect.panoramaLevel != null)
+            return 10 * (Number(otherEffect.residences[0].populationLevel.guid) - Number(self.residences[0].populationLevel.guid)) + otherEffect.panoramaLevel - self.panoramaLevel;
 
-        if (this.panoramaLevel != null)
+        if (self.panoramaLevel != null)
             return -1000;
 
-        if (other.panoramaLevel != null)
+        if (otherEffect.panoramaLevel != null)
             return 1000;
 
-        return this.name().localeCompare(other.name());
+        const selfName = typeof self.name === "function" ? self.name() : self.name;
+        const otherName = typeof otherEffect.name === "function" ? otherEffect.name() : otherEffect.name;
+        return String(selfName).localeCompare(String(otherName));
     }
 }
 
@@ -474,10 +492,10 @@ export class RecipeList extends NamedElement {
         this.island = island;
 
         if (list.region)
-            this.region = assetsMap.get(list.region);
+            this.region = /** @type {any} */ (assetsMap.get(Number(list.region)));
 
-        this.recipeBuildings = list.recipeBuildings.map(r => {
-            var a = assetsMap.get(r);
+        this.recipeBuildings = /** @type {Array<string|number>} */ (list.recipeBuildings).map((/** @type {string|number} */ r) => {
+            var a = /** @type {any} */ (assetsMap.get(Number(r)));
             a.recipeList = this;
             return a;
         });

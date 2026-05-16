@@ -6,16 +6,73 @@ import { NumberInputHandler, EPSILON } from './util.js'
 /** @typedef {import('./types.js').AssetIconModel} AssetIconModel */
 /** @typedef {import('./types.js').ComponentInfo} ComponentInfo */
 /** @typedef {import('./types.js').Demand} Demand */
+/** @typedef {import('./types.js').AppView} AppView */
 /** @typedef {import('./types.js').ExistingBuildingsAsset} ExistingBuildingsAsset */
 /** @typedef {import('./types.js').ParamsObject} ParamsObject */
 /** @typedef {import('./types.js').ResidenceBuilding} ResidenceBuilding */
 /** @typedef {import('./types.js').AppWindow} AppWindow */
 /** @typedef {import('./types.js').WithPropertiesBindingContext} WithPropertiesBindingContext */
 /** @typedef {import('./types.js').WithPropertiesValueAccessor} WithPropertiesValueAccessor */
+/** @typedef {{ obs: KnockoutObservable<number|string>, id: string|number }} NumberInputParams */
+
+/** @typedef {{ asset: AssetIconModel }} AssetIconViewModel */
+/** @typedef {{ data: unknown, button: unknown }} FactoryHeaderParams */
+/** @typedef {{ $data: unknown, hasButton: unknown, $root: AppView }} FactoryHeaderViewModel */
+/** @typedef {{ residence: ResidenceBuilding }} ResidenceLabelViewModel */
+/** @typedef {{ entries: Array<unknown>, filter: unknown }} ResidenceEffectEntryParams */
+/** @typedef {{ entries: Array<unknown>, filter: unknown, texts: AppView['texts'] }} ResidenceEffectEntryViewModel */
+/** @typedef {{ old: AssetIconModel, new: AssetIconModel }} ReplacementParams */
+/** @typedef {{ old: AssetIconModel, replacing: AssetIconModel }} ReplacementViewModel */
+/** @typedef {{ asset: ExistingBuildingsAsset, texts: AppView['texts'] }} ExistingBuildingsInputViewModel */
+/** @typedef {{ checked: KnockoutObservable<boolean>, guid: string|number, name: string|(() => string), icon?: string }} IconCheckboxAsset */
+/** @typedef {{ asset: IconCheckboxAsset, checked?: KnockoutObservable<boolean>, id?: string|number, title?: string|(() => string) }} IconCheckboxParams */
+/** @typedef {{ asset: IconCheckboxAsset, checked: KnockoutObservable<boolean>, id: string|number, title: string|(() => string) }} IconCheckboxViewModel */
+/** @typedef {{ amount: unknown }} AdditionalOutputParams */
+/** @typedef {{ amount: unknown, texts: AppView['texts'] }} AdditionalOutputViewModel */
+/** @typedef {{
+ *   id: string|number,
+ *   heading: unknown,
+ *   collapsed?: boolean,
+ *   fieldsetClass?: string,
+ *   data?: unknown,
+ *   checkbox?: KnockoutObservable<boolean> | Array<{ checked: KnockoutObservable<boolean> }>,
+ *   summary?: KnockoutObservable<number>,
+ *   colorSummary?: boolean
+ * }} CollapsibleParams
+ */
+/** @typedef {{
+ *   target: string,
+ *   heading: unknown,
+ *   collapser: { id: string, collapsed: KnockoutObservable<boolean> },
+ *   cssClass: KnockoutComputed<'hide'|'show'>,
+ *   fieldsetClass: string,
+ *   data: unknown,
+ *   hasCheckbox: boolean,
+ *   checked?: KnockoutObservable<boolean> | KnockoutComputed<boolean>,
+ *   items?: Array<{ checked: KnockoutObservable<boolean> }>,
+ *   hasSummary: boolean,
+ *   summary?: KnockoutObservable<number>,
+ *   summaryWithSign?: boolean,
+ *   summaryClass?: KnockoutObservable<string> | KnockoutComputed<string>
+ * }} CollapsibleViewModel
+ */
+/** @typedef {Demand & { module?: unknown, consumer?: { name: () => string } }} ConsumerEntryDemand */
+/** @typedef {{ demand: ConsumerEntryDemand, component: string }} ConsumerEntryViewModel */
+/** @typedef {{ factory: { island: { populationLevels: Array<{ guid: string|number }> }, demands: () => Array<ConsumerEntryDemand> } }} ConsumerViewParams */
+/** @typedef {{
+ *   factory: { island: { populationLevels: Array<{ guid: string|number }> }, demands: () => Array<ConsumerEntryDemand> },
+ *   populationLevelIndices: Map<string|number, number>,
+ *   demands: KnockoutComputed<Array<ConsumerEntryDemand>>
+ * }} ConsumerViewViewModel
+ */
 
 var ko = require("knockout");
 
 const appWindow = /** @type {AppWindow} */ (/** @type {unknown} */ (window));
+const koComponents = /** @type {any} */ (ko.components); // @copilot why?, please improve if possible
+const globalObject = /** @type {{ $?: unknown }} */ (/** @type {unknown} */ (globalThis));
+const jq = /** @type {(selector: string) => { on: (events: string, handler: (event: unknown) => void) => void, hasClass: (name: string) => boolean }} */
+    (globalObject.$);
 
 ko.bindingHandlers.withProperties = {
     /**
@@ -35,7 +92,7 @@ ko.bindingHandlers.withProperties = {
     }
 };
 
-ko.components.register('number-input-increment', {
+koComponents.register('number-input-increment', {
     viewModel: {
         // - 'params' is an object whose key/value pairs are the parameters
         //   passed from the component binding or custom element
@@ -48,7 +105,7 @@ ko.components.register('number-input-increment', {
          * @param {ParamsObject} params
          * @param {ComponentInfo} componentInfo
          */
-        createViewModel: (params, componentInfo) => new NumberInputHandler(params)
+         createViewModel: (params, componentInfo) => new NumberInputHandler(/** @type {NumberInputParams} */ (params))
     },
     template:
         `<div class="input-group-btn-vertical" >
@@ -57,14 +114,14 @@ ko.components.register('number-input-increment', {
                                                     </div>`
 });
 
-ko.components.register('notes-section', {
+koComponents.register('notes-section', {
     template:
         `<div class="form-group notes-section" data-bind="if: $data != null && $data.notes != null">
               <textarea class="form-control" data-bind="textInput: $data.notes, attr: {placeholder: $root.texts.notes.name()}"></textarea>
         </div>`
 });
 
-ko.components.register('lock-toggle', {
+koComponents.register('lock-toggle', {
     template:
         `<div style="cursor: pointer" data-bind="click: () => {checked(!checked());}">
              <img class="icon-sm icon-light" src="icons/icon_unlock.png" data-bind="style: {display : checked()? 'none' : 'inherit'}">
@@ -72,8 +129,9 @@ ko.components.register('lock-toggle', {
         </div>`
 });
 
-ko.components.register('asset-icon', {
+koComponents.register('asset-icon', {
     /**
+    * @this {AssetIconViewModel}
     * @param {AssetIconModel} asset
      */
     viewModel: function (asset) {
@@ -82,9 +140,10 @@ ko.components.register('asset-icon', {
     template: `<img class="icon-sm" src="" data-bind="attr: { src: asset.icon ? asset.icon : null, alt: asset.name, title: asset.name}">`
 });
 
-ko.components.register('factory-header', {
+koComponents.register('factory-header', {
     /**
-     * @param {ParamsObject} params
+     * @this {FactoryHeaderViewModel}
+     * @param {FactoryHeaderParams} params
      */
     viewModel: function (params) {
         this.$data = params.data;
@@ -108,8 +167,9 @@ ko.components.register('factory-header', {
         </div>`
 })
 
-ko.components.register('residence-label', {
+koComponents.register('residence-label', {
     /**
+     * @this {ResidenceLabelViewModel}
      * @param {ResidenceBuilding} residence
      */
     viewModel: function (residence) {
@@ -123,9 +183,10 @@ ko.components.register('residence-label', {
         </div>`
 })
 
-ko.components.register('residence-effect-entry', {
+koComponents.register('residence-effect-entry', {
     /**
-     * @param {ParamsObject} params
+     * @this {ResidenceEffectEntryViewModel}
+     * @param {ResidenceEffectEntryParams} params
      */
     viewModel: function (params) {
         this.entries = params.entries;
@@ -155,9 +216,10 @@ ko.components.register('residence-effect-entry', {
         `
 });
 
-ko.components.register('replacement', {
+koComponents.register('replacement', {
     /**
-     * @param {ParamsObject} params
+     * @this {ReplacementViewModel}
+     * @param {ReplacementParams} params
      */
     viewModel: function (params) {
         this.old = params.old;
@@ -178,8 +240,9 @@ ko.components.register('replacement', {
         </div>`
 });
 
-ko.components.register('existing-buildings-input', {
+koComponents.register('existing-buildings-input', {
     /**
+    * @this {ExistingBuildingsInputViewModel}
     * @param {ExistingBuildingsAsset} asset
      */
     viewModel: function (asset) {
@@ -199,9 +262,10 @@ ko.components.register('existing-buildings-input', {
         </div>`
 });
 
-ko.components.register('icon-checkbox', {
+koComponents.register('icon-checkbox', {
     /**
-     * @param {ParamsObject} params
+     * @this {IconCheckboxViewModel}
+     * @param {IconCheckboxParams} params
      */
     viewModel: function (params) {
         this.asset = params.asset;
@@ -219,9 +283,10 @@ ko.components.register('icon-checkbox', {
         </div>`
 });
 
-ko.components.register('additional-output', {
+koComponents.register('additional-output', {
     /**
-     * @param {ParamsObject} params
+     * @this {AdditionalOutputViewModel}
+     * @param {AdditionalOutputParams} params
      */
     viewModel: function (params) {
         this.amount = params.amount;
@@ -233,14 +298,16 @@ ko.components.register('additional-output', {
         </div>`
 });
 
-ko.components.register('collapsible', {
+koComponents.register('collapsible', {
     /**
-     * @param {ParamsObject} params
+     * @this {CollapsibleViewModel}
+     * @param {CollapsibleParams} params
      */
     viewModel: function (params) {
         this.target = '#' + params.id;
         this.heading = params.heading;
-        this.collapser = /** @type {any} */ (appWindow.view.collapsibleStates).get(params.id, params.collapsed);
+        const collapsibleStates = /** @type {{ get: (id: string, collapsed: boolean) => unknown }} */ (appWindow.view.collapsibleStates);
+        this.collapser = /** @type {{id: string, collapsed: KnockoutObservable<boolean>}} */ (collapsibleStates.get(String(params.id), !!params.collapsed));
         this.cssClass = ko.pureComputed(() => this.collapser.collapsed() ? "hide" : "show");
         this.fieldsetClass = params.fieldsetClass ? params.fieldsetClass : "collapsible-section";
         this.data = params.data;
@@ -251,10 +318,11 @@ ko.components.register('collapsible', {
             if (ko.isWriteableObservable(params.checkbox))
                 this.checked = params.checkbox;
             else {
-                this.items = params.checkbox;
+                const items = /** @type {Array<{ checked: KnockoutObservable<boolean> }>} */ (params.checkbox);
+                this.items = items;
                 this.checked = ko.pureComputed({
                     read: () => {
-                        for (var n of this.items)
+                        for (var n of items)
                             if (!n.checked())
                                 return false;
 
@@ -264,7 +332,7 @@ ko.components.register('collapsible', {
                      * @param {boolean} checked
                      */
                     write: (checked) => {
-                        for (var n of this.items)
+                        for (var n of items)
                             n.checked(checked);
                     }
                 })
@@ -273,15 +341,16 @@ ko.components.register('collapsible', {
 
         this.hasSummary = false;
         if (params.summary) {
+            const summary = params.summary;
             this.hasSummary = true;
-            this.summary = params.summary;
+            this.summary = summary;
             if (params.colorSummary) {
                 this.summaryWithSign = true;
                 this.summaryClass = ko.pureComputed(() => {
-                    if (Math.abs(this.summary()) < EPSILON)
+                    if (Math.abs(summary()) < EPSILON)
                         return "";
 
-                    return this.summary() < 0 ? "amount-negative" : "amount-positive"
+                    return summary() < 0 ? "amount-negative" : "amount-positive"
                 })
             } else {
                 this.summaryWithSign = false;
@@ -290,8 +359,8 @@ ko.components.register('collapsible', {
         }
 
         setTimeout(() => {
-            $(this.target).on("hidden.bs.collapse shown.bs.collapse", (event) => {
-                this.collapser.collapsed(!$(this.target).hasClass("show"));
+            jq(this.target).on("hidden.bs.collapse shown.bs.collapse", () => {
+                this.collapser.collapsed(!jq(this.target).hasClass("show"));
             });
         });
 
@@ -326,11 +395,11 @@ ko.components.register('collapsible', {
             `
 });
 
-ko.components.register('consumer-unknown', {
+koComponents.register('consumer-unknown', {
     template: `<span>?</span>`
 });
 
-ko.components.register('consumer-population', {
+koComponents.register('consumer-population', {
     template:
         `<div class="inline-list" style="cursor: pointer" data-dismiss="modal" data-bind="click: () => {setTimeout(() => { $root.selectedPopulationLevel($data.level); $('#population-level-config-dialog').modal('show')}, 500);}" >
             <div data-bind="component: {name: 'asset-icon', params: $data.level}"></div>
@@ -338,7 +407,7 @@ ko.components.register('consumer-population', {
         </div>`
 });
 
-ko.components.register('consumer-factory', {
+koComponents.register('consumer-factory', {
     template:
         `<div class="inline-list" style="cursor: pointer" data-bind="click: () => {$root.selectedFactory($data.consumer);}" >
             <div data-bind="component: {name: 'asset-icon', params: $data.consumer}"></div>
@@ -346,7 +415,7 @@ ko.components.register('consumer-factory', {
         </div>`
 });
 
-ko.components.register('consumer-module', {
+koComponents.register('consumer-module', {
     template:
         `<div class="inline-list" style="cursor: pointer" data-bind="click: () => {$root.selectedFactory($data.consumer);}" >
             <div data-bind="component: {name: 'asset-icon', params: $data.consumer}"></div>
@@ -355,9 +424,10 @@ ko.components.register('consumer-module', {
         </div>`
 });
 
-ko.components.register('consumer-entry', {
+koComponents.register('consumer-entry', {
     /**
-     * @param {Demand} demand
+     * @this {ConsumerEntryViewModel}
+     * @param {ConsumerEntryDemand} demand
      */
     viewModel: function (demand) {
         this.demand = demand;
@@ -375,20 +445,22 @@ ko.components.register('consumer-entry', {
         `<div data-bind="component: { name: component, params: demand}"></div>`
 });
 
-ko.components.register('consumer-view', {
+koComponents.register('consumer-view', {
     /**
-     * @param {ParamsObject} params
+     * @this {ConsumerViewViewModel}
+     * @param {ConsumerViewParams} params
      */
     viewModel: function (params) {
         this.factory = params.factory;
         this.populationLevelIndices = new Map();
-        this.factory.island.populationLevels.forEach((l, i) => this.populationLevelIndices.set(l.guid, i));
+        this.factory.island.populationLevels.forEach((/** @type {{guid: number|string}} */ l, /** @type {number} */ i) => this.populationLevelIndices.set(l.guid, i));
 
         this.demands = ko.pureComputed(() => {
-            var demands = this.factory.demands().filter(d => d.amount() > ACCURACY);
+            var demands = this.factory.demands().filter((d) => d.amount() > EPSILON);
             return demands.sort((a, b) => {
                 if (a instanceof PopulationNeed && b instanceof PopulationNeed)
-                    return this.populationLevelIndices.get(a.level.guid) - this.populationLevelIndices.get(b.level.guid);
+                    return Number(this.populationLevelIndices.get((/** @type {any} */ (a)).level.guid) ?? -1)
+                        - Number(this.populationLevelIndices.get((/** @type {any} */ (b)).level.guid) ?? -1);
 
                 if (a instanceof PopulationNeed)
                     return -1000;
@@ -396,13 +468,16 @@ ko.components.register('consumer-view', {
                 if (b instanceof PopulationNeed)
                     return 1000;
 
-                if (a.consumer && b.consumer)
-                    return a.consumer.name().localeCompare(b.consumer.name());
+                const aDemand = /** @type {Demand & {consumer?: Consumer}} */ (/** @type {unknown} */ (a));
+                const bDemand = /** @type {Demand & {consumer?: Consumer}} */ (/** @type {unknown} */ (b));
 
-                if (a.consumer)
+                if (aDemand.consumer && bDemand.consumer)
+                    return String(typeof aDemand.consumer.name === 'function' ? aDemand.consumer.name() : aDemand.consumer.name).localeCompare(String(typeof bDemand.consumer.name === 'function' ? bDemand.consumer.name() : bDemand.consumer.name));
+
+                if (aDemand.consumer)
                     return -1000;
 
-                if (b.consumer)
+                if (bDemand.consumer)
                     return 1000;
 
                 return b.amount() - a.amount();
