@@ -5,6 +5,8 @@ import { PopulationNeed, ResidenceEffect, ResidenceEffectCoverage } from './cons
 import { ProductCategory, Product, Demand } from './production.js'
 import { Consumer, Factory } from './factories.js'
 
+/** @typedef {import('./types.js').Need} Need */
+
 var ko = require( "knockout" );
 
 export class DarkMode {
@@ -84,8 +86,13 @@ export class ViewMode {
 }
 
 export class Template {
+    /**
+     * @param {unknown} asset
+     * @param {unknown} parentInstance
+     * @param {string} attributeName
+     * @param {number} index
+     */
     constructor(asset, parentInstance, attributeName, index) {
-
 
         this.attributeName = attributeName;
         this.index = index;
@@ -130,6 +137,9 @@ export class Template {
 
     }
 
+    /**
+     * @param {unknown} asset
+     */
     applicable(asset) {
         return asset instanceof PopulationLevel ||
             asset instanceof Workforce ||
@@ -142,15 +152,18 @@ export class Template {
 
 export class ProductionChainView {
     /**
-     * 
-     * @param {KnockoutObservable<Factory|Consumer>} factory
-     * @param {KnockoutObservable<number>|null} amount
+     * @param {Factory} factory
+     * @param {number} amount
      */
     constructor(factory, amount = null) {
         this.factory = factory;
         this.amount = amount;
 
         this.tree = ko.pureComputed(() => {
+            /**
+             * @param {Consumer} consumer
+             * @param {number} amount
+             */
             let traverse = (/** @type Factory|Consumer */consumer, amount) => {
                     if (amount < ACCURACY)
                         return null;
@@ -213,6 +226,9 @@ export class ProductionChainView {
             if (this.tree() == null)
                 return 0;
 
+            /**
+             * @param {unknown} node
+             */
             var traverse = node => Math.max(1, (node.children || []).map(n => traverse(n)).reduce((a,b) => a +b, 0));
 
             return traverse(this.tree());
@@ -222,9 +238,7 @@ export class ProductionChainView {
 
 class ResidenceEffectAggregate {
     /**
-     * 
-     * @param {KnockoutObservable<number>} totalResidences
-     * @param {ResidenceBuilding} residence
+     * @param {unknown} totalResidences
      * @param {ResidenceEffectCoverage} residenceEffectCoverage
      */
     constructor(totalResidences, residenceEffectCoverage) {
@@ -234,6 +248,9 @@ class ResidenceEffectAggregate {
         this.coverage = [residenceEffectCoverage];
     }
 
+    /**
+     * @param {ResidenceEffectCoverage} residenceEffectCoverage
+     */
     add(residenceEffectCoverage) {
         this.coverage.push(residenceEffectCoverage);
     }
@@ -250,9 +267,9 @@ class ResidenceEffectAggregate {
 
 export class ResidenceEffectView {
     /**
-     * 
-     * @param {[ResidenceBuilding]} residences 
-     * @param {PopulationNeed} need 
+     * @param {unknown} residences
+     * @param {unknown} heading
+     * @param {PopulationNeed|Need} need
      */
     constructor(residences, heading = null, need = null) {
         this.heading = heading || window.view.texts.needConsumption.name;
@@ -335,6 +352,9 @@ export class ResidenceEffectView {
         }
     }
 
+    /**
+     * @param {unknown} aggregate
+     */
     delete(aggregate) {
         aggregate.coverage.forEach(coverage => {
             coverage.residence.removeEffectCoverage(coverage);
@@ -367,6 +387,10 @@ export class ResidenceEffectView {
 }
 
 class Collapsible {
+    /**
+     * @param {string} id
+     * @param {boolean} collapsed
+     */
     constructor(id, collapsed) {
         this.id = id;
         this.collapsed = ko.observable(!!collapsed);
@@ -387,7 +411,6 @@ export class CollapsibleStates {
                 console.error(e);
             }
 
-
             this.collapsiblesSubscription = ko.computed(() => {
                 var json = {};
                 for (var c of this.collapsibles())
@@ -399,10 +422,9 @@ export class CollapsibleStates {
     }
 
     /**
-     * 
+     * @returns {Collapsible}
      * @param {string} id
      * @param {boolean} collapsed
-     * @returns {Collapsible}
      */
     get(id, collapsed) {
         for (var c of this.collapsibles())

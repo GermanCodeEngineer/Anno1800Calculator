@@ -4,9 +4,24 @@ import { MetaProduct, NoFactoryProduct, Product } from './production.js'
 import { NoFactoryNeed, PopulationNeed, PublicBuildingNeed, ResidenceEffectCoverage, ResidenceEffectEntryCoverage, ResidenceNeed } from './consumption.js'
 import { ResidenceEffectView} from './views.js'
 
+/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.js').ResidenceEffect} ResidenceEffect */
+/** @typedef {import('./types.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
+/** @typedef {import('./types.js').Need} Need */
+/** @typedef {import('./types.js').Session} Session */
+/** @typedef {import('./types.js').Demand} Demand */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').JsonObject} JsonObject */
+/** @typedef {import('./types.js').AssetsMap} AssetsMap */
+
 var ko = require( "knockout" );
 
 export class ResidenceBuilding extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(config, assetsMap, island) {
         super(config);
         this.island = island;
@@ -49,6 +64,9 @@ export class ResidenceBuilding extends NamedElement {
         this.residents = ko.observable(0);
     }
 
+    /**
+     * @param {unknown} needsMap
+     */
     initializeNeeds(needsMap){
         this.needsMap = needsMap;
         this.consumingLimit = ko.pureComputed(() => {
@@ -88,15 +106,24 @@ export class ResidenceBuilding extends NamedElement {
         });
     }
 
+    /**
+     * @param {ResidenceEffect|NewspaperNeedConsumptionEntry} effect
+     */
     addEffect(effect) {
-        this.allEffects.set(effect.guid, effect);
+        this.allEffects.set(effect.guid, effect); // @ts-ignore
     }
 
+    /**
+     * @param {ResidenceEffectCoverage} effectCoverage
+     */
     addEffectCoverage(effectCoverage) {
         this.effectCoverage.push(effectCoverage);
         this.sortEffectCoverage();
     }
 
+    /**
+     * @param {ResidenceEffectCoverage} effectCoverage
+     */
     removeEffectCoverage(effectCoverage) {
         this.effectCoverage.remove(effectCoverage);
     }
@@ -104,7 +131,6 @@ export class ResidenceBuilding extends NamedElement {
     sortEffectCoverage() {
         this.effectCoverage.sort((a, b) => a.residenceEffect.compare(b.residenceEffect));
     }
-
 
     getNoConsumptionResidents() {
         var residents = 0;
@@ -121,8 +147,8 @@ export class ResidenceBuilding extends NamedElement {
     }
 
     /**
-     * @param {Product|ResidenceNeed|Need } need
      * @returns {[ResidenceEffectEntryCoverage]}
+     * @param {PopulationNeed|Need} need
      */
     getConsumptionEntries(need) {
         if (!(need instanceof Product)) {
@@ -143,6 +169,9 @@ export class ResidenceBuilding extends NamedElement {
         return coverageMap;
     }
 
+    /**
+     * @param {JsonObject} json
+     */
     applyEffects(json) {
         var coverage = [];
         for (var guid in json) {
@@ -164,6 +193,11 @@ export class ResidenceBuilding extends NamedElement {
 }
 
 export class PopulationLevel extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(config, assetsMap, island) {
         super(config);
         this.island = island
@@ -207,7 +241,6 @@ export class PopulationLevel extends NamedElement {
             return true;
         });
 
-
         this.existingBuildings = ko.pureComputed({
             read: () => {
                 var sum = 0;
@@ -217,6 +250,9 @@ export class PopulationLevel extends NamedElement {
                 return sum;
             },
 
+            /**
+             * @param {unknown} val
+             */
             write: val => {
                 if(this.canEdit())
                    this.residence.existingBuildings(val);
@@ -274,6 +310,9 @@ export class PopulationLevel extends NamedElement {
         });
         this.residentsInput = ko.pureComputed({
             read: () => formatNumber(this.residents()),
+            /**
+             * @param {unknown} val
+             */
             write: val => {
                 val = parseInt(val.replace(/[^\d]/g, ""));
                 if (!this.canEdit() || !isFinite(val) || val < 0) {
@@ -343,6 +382,9 @@ export class PopulationLevel extends NamedElement {
         });
     }
 
+    /**
+     * @param {AssetsMap} assetsMap
+     */
     initBans(assetsMap) {
         for (var n of this.needs.concat(this.buildingNeeds))
             n.initBans(this, assetsMap);
@@ -382,6 +424,9 @@ export class PopulationLevel extends NamedElement {
         }
     }
 
+    /**
+     * @param {PopulationNeed|Need} need
+     */
     prepareResidenceEffectView(need = null) {
         var heading = this.name;
         if (need)
@@ -391,6 +436,10 @@ export class PopulationLevel extends NamedElement {
 }
 
 export class CommuterWorkforce extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {Session} session
+     */
     constructor(config, session) {
         super(config);
 
@@ -417,6 +466,10 @@ export class CommuterWorkforce extends NamedElement {
 }
 
 export class Workforce extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
         this.demands = ko.observableArray([]);
@@ -437,18 +490,25 @@ export class Workforce extends NamedElement {
         });
     }
 
-
-
+    /**
+     * @param {Demand} demand
+     */
     add(demand) {
         this.demands.push(demand);
     }
 
+    /**
+     * @param {Demand} demand
+     */
     remove(demand){
         this.demands.remove(demand);
     }
 }
 
 export class WorkforceDemand extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         super(config);
         this.buildings = 0;
@@ -467,8 +527,7 @@ export class WorkforceDemand extends NamedElement {
     }
 
     /**
-     * 
-     * @param {Workforce|null} workforce 
+     * @param {Workforce} workforce
      */
     updateWorkforce(workforce = null){
         if(workforce == null)
@@ -481,6 +540,9 @@ export class WorkforceDemand extends NamedElement {
         }
     }
 
+    /**
+     * @param {number} buildings
+     */
     updateAmount(buildings) {
         this.buildings = buildings;
 

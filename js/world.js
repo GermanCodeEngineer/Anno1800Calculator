@@ -2,6 +2,10 @@
 import { ALL_ISLANDS, setDefaultFixedFactories, NamedElement, Option } from './util.js'
 import { texts } from './i18n.js'
 
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').ParamsObject} ParamsObject */
+/** @typedef {import('./types.js').AssetsMap} AssetsMap */
+
 import { CommuterWorkforce, Workforce, ResidenceBuilding, PopulationLevel } from './population.js'
 import { ResidenceEffect, RecipeList } from './consumption.js'
 import { NoFactoryProduct, Product, MetaProduct, Item, ProductCategory } from './production.js'
@@ -13,7 +17,6 @@ var ko = require("knockout");
 
 class Storage {
     /**
-     * 
      * @param {string} key
      */
     constructor(key) {
@@ -31,6 +34,10 @@ class Storage {
         }
     }
 
+    /**
+     * @param {string} itemKey
+     * @param {string|number|boolean} value
+     */
     setItem(itemKey, value) {
         this.map.set(itemKey, value);
 
@@ -41,10 +48,16 @@ class Storage {
         this.save();
     }
 
+    /**
+     * @param {string} itemKey
+     */
     getItem(itemKey) {
         return this.map.get(itemKey);
     }
 
+    /**
+     * @param {string} itemKey
+     */
     removeItem(itemKey) {
         this.map.delete(itemKey);
 
@@ -55,6 +68,9 @@ class Storage {
         this.save();
     }
 
+    /**
+     * @param {number} index
+     */
     key(index) {
         var i = 0;
         for (let attr in this.json)
@@ -65,7 +81,6 @@ class Storage {
     }
 
     /**
-     * 
      * @param {string} key
      */
     updateKey(key) {
@@ -95,6 +110,10 @@ class Storage {
 
 export class Region extends NamedElement { }
 export class Session extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
 
@@ -110,16 +129,28 @@ export class Session extends NamedElement {
         }
     }
 
+    /**
+     * @param {unknown} isl
+     */
     addIsland(isl) {
         this.islands.push(isl);
     }
 
+    /**
+     * @param {unknown} isl
+     */
     deleteIsland(isl) {
         this.islands.remove(isl);
     }
 }
 
-class Island {
+export class Island {
+    /**
+     * @param {ParamsObject} params
+     * @param {Storage} localStorage
+     * @param {boolean} isNew
+     * @param {Session} session
+     */
     constructor(params, localStorage, isNew, session) {
         if (localStorage instanceof Storage) {
             this.name = ko.observable(localStorage.key);
@@ -399,7 +430,6 @@ class Island {
             f.referenceProducts(assetsMap);
         });
 
-
         for (var building of (params.residenceBuildings || [])) {
             var b = new ResidenceBuilding(building, assetsMap, this);
             assetsMap.set(b.guid, b);
@@ -428,7 +458,6 @@ class Island {
             if (localStorage)
                 localStorage.removeItem(`${e.guid}.checked`);
         }
-
 
         for (let b of this.residenceBuildings) {
             {
@@ -468,13 +497,11 @@ class Island {
 
         }
 
-
         for (var category of params.productFilter) {
             let c = new ProductCategory(category, assetsMap);
             assetsMap.set(c.guid, c);
             this.categories.push(c);
         }
-
 
         for (let p of this.categories[1].products) {
             if (p)
@@ -484,8 +511,6 @@ class Island {
                     }
                 }
         }
-
-
 
         for (let b of this.publicRecipeBuildings) {
             if (b.goodConsumptionUpgrade)
@@ -503,7 +528,6 @@ class Island {
                 persistInt(f.workforceDemand, "percentBoost", `${f.guid}.workforce.percentBoost`);
         }
 
-
         this.workforce = this.workforce.filter(w => w.demands().length);
 
         this.assetsMap = assetsMap;
@@ -511,6 +535,10 @@ class Island {
         this.noFactoryProducts = noFactoryProducts;
 
         this.top2Population = ko.computed(() => {
+            /**
+             * @param {unknown} a
+             * @param {unknown} b
+             */
             var comp = (a, b) => b.residents() - a.residents();
 
             return [...this.populationLevels].sort(comp).slice(0, 2).filter(l => l.residents());
@@ -648,6 +676,10 @@ class Island {
 }
 
 export class IslandManager {
+    /**
+     * @param {ParamsObject} params
+     * @param {boolean} isFirstRun
+     */
     constructor(params, isFirstRun = false) {
         let islandKey = "islandName";
         let islandsKey = "islandNames";
@@ -696,8 +728,6 @@ export class IslandManager {
         if (!view.island())
             view.island(allIslands);
 
-
-
         if (localStorage) {
             view.islands.subscribe(islands => {
                 let islandNames = JSON.stringify(islands.filter(i => !i.isAllIslands()).map(i => i.name()));
@@ -719,6 +749,10 @@ export class IslandManager {
         });
     }
 
+    /**
+     * @param {string} name
+     * @param {Session} session
+     */
     create(name, session) {
         if (name == null) {
             if (this.islandExists())
@@ -748,6 +782,9 @@ export class IslandManager {
             this.islandNameInput(null);
     }
 
+    /**
+     * @param {Island} island
+     */
     delete(island) {
         if (island == null)
             island = view.island();
@@ -782,6 +819,10 @@ export class IslandManager {
         this.sortUnusedNames();
     }
 
+    /**
+     * @param {Island} island
+     * @param {string} name
+     */
     rename(island, name) {
         if (this.islandExists())
             return;
@@ -812,6 +853,9 @@ export class IslandManager {
         this.sortUnusedNames();
     }
 
+    /**
+     * @param {Island} island
+     */
     startRename(island) {
         if (island.isAllIslands())
             return;
@@ -821,15 +865,25 @@ export class IslandManager {
         $('#island-rename-dialog').modal("show");
     }
 
+    /**
+     * @param {IslandNameCandidate} candidate
+     */
     deleteCandidate(candidate) {
         this.unusedNames.delete(candidate.name);
         this.islandCandidates.remove(candidate);
     }
 
+    /**
+     * @param {string} name
+     */
     getByName(name) {
         return name == ALL_ISLANDS ? this.allIslands : this.serverNamesMap.get(name);
     }
 
+    /**
+     * @param {string} name
+     * @param {Session} session
+     */
     registerName(name, session) {
         if (name == ALL_ISLANDS || this.serverNamesMap.has(name))
             return;
@@ -861,6 +915,10 @@ export class IslandManager {
         this.sortUnusedNames();
     }
 
+    /**
+     * @param {string} name1
+     * @param {string} name2
+     */
     compareNames(name1, name2) {
         var totalLength = Math.max(name1.length, name2.length);
         var minLcsLength = totalLength - Math.round(-0.677 + 1.51 * Math.log(totalLength));
@@ -906,6 +964,10 @@ export class IslandManager {
     // Function to find length of Longest Common Subsequence of substring
     // X[0..m-1] and Y[0..n-1]
     // From https://www.techiedelight.com/longest-common-subsequence/
+    /**
+     * @param {number} X
+     * @param {number} Y
+     */
     lcsLength(X, Y) {
         var m = X.length, n = Y.length;
 

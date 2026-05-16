@@ -1,5 +1,9 @@
 // @ts-check
 
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').ParamsObject} ParamsObject */
+/** @typedef {import('./types.js').AssetsMap} AssetsMap */
+
 var ko = require( "knockout" );
 
 export let versionCalculator = "v11.1";
@@ -8,8 +12,9 @@ export let ACCURACY = 0.01;
 export let EPSILON = 0.0000001;
 export let ALL_ISLANDS = "All Islands";
 
-
-
+/**
+ * @param {AssetsMap} assetsMap
+ */
 export function setDefaultFixedFactories(assetsMap) {
     // Default rum, cotton fabric and coffee to the new world production
     assetsMap.get(1010240).fixedFactory(assetsMap.get(1010318));
@@ -20,6 +25,9 @@ export function setDefaultFixedFactories(assetsMap) {
     assetsMap.get(1010206).fixedFactory(assetsMap.get(1010284));
 }
 
+/**
+ * @param {unknown} string
+ */
 function removeSpaces(string) {
     if (typeof string === "function")
         string = string();
@@ -27,6 +35,10 @@ function removeSpaces(string) {
 }
 
 var formater = new Intl.NumberFormat(navigator.language || "en").format;
+/**
+ * @param {unknown} num
+ * @param {boolean} forceSign
+ */
 export function formatNumber(num, forceSign = false) {
     var rounded = Math.ceil(100 * parseFloat(num)) / 100;
     if (Math.abs(rounded) < EPSILON)
@@ -38,6 +50,9 @@ export function formatNumber(num, forceSign = false) {
 }
 
 export class NumberInputHandler {
+    /**
+     * @param {ParamsObject} params
+     */
     constructor(params) {
         this.obs = params.obs;
         this.id = params.id;
@@ -64,6 +79,9 @@ export class NumberInputHandler {
         });
     }
 
+    /**
+     * @param {Event} evt
+     */
     getInputFactor(evt) {
         var factor = 1
         if (evt.ctrlKey)
@@ -74,10 +92,18 @@ export class NumberInputHandler {
     }
 }
 
+/**
+ * @param {unknown} number
+ * @param {boolean} forceSign
+ */
 export function formatPercentage(number, forceSign = true) {
     return window.formatNumber(Math.ceil(10 * parseFloat(number)) / 10, forceSign) + ' %';
 }
 
+/**
+ * @param {KnockoutObservable<unknown>} obs
+ * @param {unknown} val
+ */
 export function delayUpdate(obs, val) {
     var version = obs.getVersion ? obs.getVersion() : obs();
     setTimeout(() => {
@@ -86,13 +112,14 @@ export function delayUpdate(obs, val) {
     });
 }
 
-
-
 // from https://knockoutjs.com/documentation/extenders.html
 ko.extenders.numeric = function (target, bounds) {
     //create a writable computed observable to intercept writes to our observable
     var result = ko.computed({
         read: target,  //always return the original observables value
+        /**
+         * @param {unknown} newValue
+         */
         write: function (newValue) {
             var current = target();
 
@@ -146,13 +173,11 @@ ko.extenders.numeric = function (target, bounds) {
     return result;
 };
 
-
 /**
- * 
- * @param {number} init - inital value
+ * @param {number} init
  * @param {number} min
  * @param {number} max
- * @param {beforeValueUpdateCallback} callback
+ * @param {unknown} callback
  */
 export function createIntInput(init, min = -Infinity, max = Infinity, callback = null) {
     return ko.observable(init).extend({
@@ -165,6 +190,12 @@ export function createIntInput(init, min = -Infinity, max = Infinity, callback =
     });
 }
 
+/**
+ * @param {number} init
+ * @param {number} min
+ * @param {number} max
+ * @param {unknown} callback
+ */
 export function createFloatInput(init, min = -Infinity, max = Infinity, callback = null) {
     return ko.observable(init).extend({
         numeric: {
@@ -176,9 +207,10 @@ export function createFloatInput(init, min = -Infinity, max = Infinity, callback
     });
 }
 
-
-
 export class NamedElement {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         $.extend(this, config);
         this.locaText = this.locaText || {}
@@ -212,6 +244,9 @@ export class NamedElement {
 
     }
 
+    /**
+     * @param {KnockoutObservable<unknown>} obs
+     */
     lockDLCIfSet(obs) {
         if (this.dlcs == null || this.dlcs.length != 1)
             return;
@@ -230,6 +265,9 @@ export class NamedElement {
 }
 
 export class Option extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         super(config);
         this.checked = ko.observable(false);
@@ -238,6 +276,9 @@ export class Option extends NamedElement {
 }
 
 export class DLC extends Option {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         super(config);
 
@@ -258,20 +299,17 @@ export class DLC extends Option {
     }
 
     /**
-     * 
-     * @param {ko.observable} obs
+     * @param {KnockoutObservable<unknown>} obs
      */
     addDependentObject(obs) {
         this.dependentObjects.push(obs);
     }
 
     /**
-     *
-     * @param {ko.observable} obs
+     * @param {KnockoutObservable<unknown>} obs
      */
     removeDependentObject(obs) {
         this.dependentObjects.remove(obs);
     }
 }
-
 

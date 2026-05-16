@@ -4,9 +4,18 @@ import { Workforce, WorkforceDemand } from './population.js'
 import { ExtraGoodProductionList, Demand} from './production.js'
 import { TradeList, ContractList } from './trade.js'
 
+/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').AssetsMap} AssetsMap */
+
 var ko = require("knockout");
 
 export class Consumer extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(config, assetsMap, island) {
         super(config);
 
@@ -49,6 +58,9 @@ export class Consumer extends NamedElement {
         return this.inputs || [];
     }
 
+    /**
+     * @param {AssetsMap} assetsMap
+     */
     referenceProducts(assetsMap) {
         if (this.inputs)
             this.inputs.forEach(i => i.product = assetsMap.get(i.Product));
@@ -108,13 +120,14 @@ export class Consumer extends NamedElement {
         });
     }
 
-
+    /**
+     * @param {AssetsMap} assetsMap
+     */
     createWorkforceDemand(assetsMap) {
         for (let m of this.maintenances || []) {
             let a = assetsMap.get(m.Product);
             if (a instanceof Workforce) {
                 this.workforceDemand = new WorkforceDemand($.extend({ factory: this, workforce: a }, m));
-
 
                 this.workforceDemandSubscription = ko.computed(() => {
 
@@ -166,6 +179,11 @@ export class Consumer extends NamedElement {
 }
 
 export class Module extends Consumer {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(config, assetsMap, island) {
         super(config, assetsMap, island);
         this.checked = ko.observable(false);
@@ -175,6 +193,11 @@ export class Module extends Consumer {
 }
 
 export class PublicConsumerBuilding extends Consumer {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(config, assetsMap, island) {
         super(config, assetsMap, island);
 
@@ -193,6 +216,11 @@ export class PublicConsumerBuilding extends Consumer {
 }
 
 export class PowerPlant extends PublicConsumerBuilding {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(config, assetsMap, island) {
         super(config, assetsMap, island);
 
@@ -218,6 +246,10 @@ export class PowerPlant extends PublicConsumerBuilding {
 }
 
 export class Buff extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
 
@@ -226,6 +258,11 @@ export class Buff extends NamedElement {
 }
 
 export class Factory extends Consumer {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(config, assetsMap, island) {
         super(config, assetsMap, island);
         this.isFactory = true;
@@ -245,7 +282,6 @@ export class Factory extends Consumer {
         this.extraGoodProductionHistory = [];
         this.extraGoodProductionAmount = ko.pureComputed(() => {
             var val = this.extraGoodProductionList.checked() ? this.extraGoodProductionList.amount() : 0;
-
 
             if (this.extraGoodProductionHistory.length && Math.abs(val - this.extraGoodProductionHistory[0][0]) < ACCURACY)
                 return this.extraGoodProductionHistory[0][0];
@@ -293,8 +329,6 @@ export class Factory extends Consumer {
         });
 
         this.inputAmountByExtraGoods = ko.observable(0);
-
-
 
         this.percentBoost = createIntInput(100, 1);
         this.percentBoost.subscribe((val) => {
@@ -419,7 +453,6 @@ export class Factory extends Consumer {
         if (this.workforceDemand)
             this.buildings.subscribe(val => this.workforceDemand.updateAmount(Math.max(val, this.buildings())));
 
-
         this.overProduction = ko.pureComputed(() => Math.max(0, this.inputAmount() * this.extraGoodFactor() + this.externalProduction() - this.totalDemands()));
         if(this.extraGoodProductionList)
             this.extraGoodsDisplayAmount = ko.pureComputed(() => this.extraGoodProductionList.checked() ? this.extraGoodProductionList.nonZero().reduce((a, b) => a + b.amount(), 0) : 0)
@@ -455,11 +488,13 @@ export class Factory extends Consumer {
         });
     }
 
-
     getOutputs() {
         return this.outputs || [];
     }
 
+    /**
+     * @param {AssetsMap} assetsMap
+     */
     referenceProducts(assetsMap) {
         super.referenceProducts(assetsMap);
         this.getOutputs().forEach(i => i.product = assetsMap.get(i.Product));
@@ -539,11 +574,17 @@ export class Factory extends Consumer {
         this.percentBoost(parseInt(this.percentBoost()) - 1);
     }
 
+    /**
+     * @param {Demand} demand
+     */
     add(demand) {
         this.demands.push(demand);
         this.updateAmount();
     }
 
+    /**
+     * @param {Demand} demand
+     */
     remove(demand) {
         this.demands.remove(demand);
         this.updateAmount();

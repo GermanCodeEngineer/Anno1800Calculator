@@ -3,9 +3,16 @@ import { ACCURACY, ALL_ISLANDS, createIntInput, createFloatInput, NamedElement, 
 import { Product } from './production.js'
 import { Factory } from './factories.js'
 
+/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').ListObject} ListObject */
+
 var ko = require( "knockout" );
 
 class TradeRoute {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         $.extend(this, config);
 
@@ -13,6 +20,9 @@ class TradeRoute {
         this.amount(config.amount);
     }
 
+    /**
+     * @param {ListObject} list
+     */
     getOpposite(list) {
         if (list.island == this.from)
             return this.to;
@@ -20,6 +30,9 @@ class TradeRoute {
             return this.from;
     }
 
+    /**
+     * @param {Factory} factory
+     */
     getOppositeFactory(factory) {
         if (this.fromFactory == factory)
             return this.toFactory;
@@ -27,6 +40,9 @@ class TradeRoute {
             return this.fromFactory;
     }
 
+    /**
+     * @param {ListObject} list
+     */
     isExport(list) {
         return list.island == this.from;
     }
@@ -37,12 +53,18 @@ class TradeRoute {
 }
 
 export class NPCTrader extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         super(config);
     }
 }
 
 class NPCTradeRoute {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         $.extend(this, config);
 
@@ -60,6 +82,10 @@ class NPCTradeRoute {
 }
 
 export class TradeList {
+    /**
+     * @param {Island} island
+     * @param {Factory} factory
+     */
     constructor(island, factory) {
         this.island = island;
         this.factory = factory;
@@ -189,8 +215,6 @@ export class TradeManager {
                 f.tradeList.onShow();
         });
 
-
-
         if (localStorage) {
             // trade routes
             var islands = new Map();
@@ -198,6 +222,9 @@ export class TradeManager {
                 if (!i.isAllIslands())
                     islands.set(i.name(), i);
 
+            /**
+             * @param {string} name
+             */
             var resolve = name => name == ALL_ISLANDS ? view.islandManager.allIslands : islands.get(name);
 
             var text = localStorage.getItem(this.key);
@@ -223,7 +250,6 @@ export class TradeManager {
                 config.fromFactory.tradeList.routes.push(route);
                 config.toFactory.tradeList.routes.push(route);
             }
-
 
             this.persistenceSubscription = ko.computed(() => {
                 var json = [];
@@ -263,7 +289,6 @@ export class TradeManager {
                 });
             }
 
-
             this.npcPersistenceSubscription = ko.computed(() => {
                 var json = [];
 
@@ -282,6 +307,9 @@ export class TradeManager {
         }
     }
 
+    /**
+     * @param {TradeRoute} route
+     */
     add(route) {
         if (route instanceof NPCTradeRoute)
             this.npcRoutes.push(route);
@@ -289,6 +317,9 @@ export class TradeManager {
             this.routes.push(route);
     }
 
+    /**
+     * @param {TradeRoute} route
+     */
     remove(route) {
         if (route instanceof NPCTradeRoute) {
             this.npcRoutes.remove(route);
@@ -304,6 +335,9 @@ export class TradeManager {
         route.fromFactory.tradeList.unusedIslands.unshift(route.to);
     }
 
+    /**
+     * @param {Island} island
+     */
     islandDeleted(island) {
         {
             var deletedRoutes = this.routes().filter(r => r.to === island || r.from === island);
@@ -318,12 +352,18 @@ export class TradeManager {
 }
 
 class Pier extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         super(config);
     }
 }
 
 class TradeContract {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         $.extend(this, config);
 
@@ -340,6 +380,9 @@ class TradeContract {
 
         this.exportAmount = ko.pureComputed({
             read: () => this.ratio() * this.importAmount(),
+            /**
+             * @param {unknown} val
+             */
             write: val => this.importAmount(parseFloat(val) / this.ratio())
         });
 
@@ -359,6 +402,10 @@ class TradeContract {
 }
 
 export class ContractList {
+    /**
+     * @param {Island} island
+     * @param {Factory} factory
+     */
     constructor(island, factory) {
         this.island = island;
         this.factory = factory;
@@ -389,6 +436,9 @@ export class ContractList {
 }
 
 export class ContractManager {
+    /**
+     * @param {Island} island
+     */
     constructor(island) {
         this.key = "tradingContracts";
         this.paramKey = "tradingContractParams";
@@ -424,7 +474,6 @@ export class ContractManager {
                 config.importFactory.contractList.imports.push(contract);
                 config.exportFactory.contractList.exports.push(contract);
             }
-
 
             this.persistenceSubscription = ko.computed(() => {
                 var json = [];
@@ -545,16 +594,25 @@ export class ContractManager {
 
     }
 
+    /**
+     * @param {Contract} contract
+     */
     add(contract) {
         this.contracts.push(contract);
     }
 
+    /**
+     * @param {Contract} contract
+     */
     remove(contract) {
         contract.importFactory.contractList.imports.remove(contract);
         contract.exportFactory.contractList.exports.remove(contract);
         this.contracts.remove(contract);
     }
 
+    /**
+     * @param {Island} island
+     */
     islandDeleted(island) {
         var dlc = view.dlcsMap.get("dlc7");
         if (dlc) {
@@ -568,6 +626,9 @@ export class ContractManager {
 
         var transferTime = this.traderTransferTime();
 
+        /**
+         * @param {boolean} fixed
+         */
         var getAmounts = (fixed) => {
             var totalAmount = 0;
             var productToAmount = new Map();
@@ -674,6 +735,9 @@ export class ContractManager {
 }
 
 class ContractUpgrade {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         $.extend(this, config);
     }
@@ -694,7 +758,6 @@ export class ContractUpgradeManager {
             if (p.exchangeWeight)
                 this.productsMap.set(p.guid, new Product(p, assetsMap));
 
-
         if (localStorage) {
 
             var text = localStorage.getItem(this.key);
@@ -707,7 +770,6 @@ export class ContractUpgradeManager {
 
                 this.upgrades.push(new ContractUpgrade(config));
             }
-
 
             this.persistenceSubscription = ko.computed(() => {
                 var json = {};
@@ -822,7 +884,6 @@ export class ContractCreatorFactory {
             else
                 list = this.exchangeProducts().flatMap(p => p.factories);
 
-
             return list.sort((a, b) => a.getRegionExtendedName().localeCompare(b.getRegionExtendedName()));
         });
         this.exchangeFactory = ko.observable();
@@ -852,7 +913,6 @@ export class ContractCreatorFactory {
 
             var overProduction = f.overProduction();
             var outputAmount = f.substitutableOutputAmount();
-
 
             if (!f.contractList.island.isAllIslands() && f.contractList.exports().length) {
                 this.export(true);

@@ -1,11 +1,22 @@
-﻿// @ts-check
+// @ts-check
 import { PopulationNeed } from './consumption.js';
 import { Consumer } from './factories.js';
 import { NumberInputHandler, EPSILON } from './util.js'
 
+/** @typedef {import('./types.js').ResidenceBuilding} ResidenceBuilding */
+/** @typedef {import('./types.js').Demand} Demand */
+/** @typedef {import('./types.js').ParamsObject} ParamsObject */
+
 var ko = require("knockout");
 
 ko.bindingHandlers.withProperties = {
+    /**
+     * @param {unknown} element
+     * @param {unknown} valueAccessor
+     * @param {unknown} allBindings
+     * @param {unknown} viewModel
+     * @param {unknown} bindingContext
+     */
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // Make a modified binding context, with a extra properties, and apply it to descendant elements
         var innerBindingContext = bindingContext.extend(valueAccessor);
@@ -25,6 +36,10 @@ ko.components.register('number-input-increment', {
         //   already been injected into this element, but isn't yet bound.
         // - 'componentInfo.templateNodes' is an array containing any DOM
         //   nodes that have been supplied to the component. See below.
+        /**
+         * @param {ParamsObject} params
+         * @param {unknown} componentInfo
+         */
         createViewModel: (params, componentInfo) => new NumberInputHandler(params)
     },
     template:
@@ -50,6 +65,9 @@ ko.components.register('lock-toggle', {
 });
 
 ko.components.register('asset-icon', {
+    /**
+     * @param {unknown} asset
+     */
     viewModel: function (asset) {
         this.asset = asset;
     },
@@ -57,6 +75,9 @@ ko.components.register('asset-icon', {
 });
 
 ko.components.register('factory-header', {
+    /**
+     * @param {ParamsObject} params
+     */
     viewModel: function (params) {
         this.$data = params.data;
         this.hasButton = params.button;
@@ -80,6 +101,9 @@ ko.components.register('factory-header', {
 })
 
 ko.components.register('residence-label', {
+    /**
+     * @param {ResidenceBuilding} residence
+     */
     viewModel: function (residence) {
         this.residence = residence;
     },
@@ -92,6 +116,9 @@ ko.components.register('residence-label', {
 })
 
 ko.components.register('residence-effect-entry', {
+    /**
+     * @param {ParamsObject} params
+     */
     viewModel: function (params) {
         this.entries = params.entries;
         this.filter = params.filter;
@@ -121,6 +148,9 @@ ko.components.register('residence-effect-entry', {
 });
 
 ko.components.register('replacement', {
+    /**
+     * @param {ParamsObject} params
+     */
     viewModel: function (params) {
         this.old = params.old;
         this.replacing = params.new;
@@ -141,6 +171,9 @@ ko.components.register('replacement', {
 });
 
 ko.components.register('existing-buildings-input', {
+    /**
+     * @param {unknown} asset
+     */
     viewModel: function (asset) {
         this.asset = asset;
         this.texts = window.view.texts;
@@ -159,6 +192,9 @@ ko.components.register('existing-buildings-input', {
 });
 
 ko.components.register('icon-checkbox', {
+    /**
+     * @param {ParamsObject} params
+     */
     viewModel: function (params) {
         this.asset = params.asset;
         this.checked = params.checked || this.asset.checked;
@@ -176,6 +212,9 @@ ko.components.register('icon-checkbox', {
 });
 
 ko.components.register('additional-output', {
+    /**
+     * @param {ParamsObject} params
+     */
     viewModel: function (params) {
         this.amount = params.amount;
         this.texts = window.view.texts;
@@ -187,6 +226,9 @@ ko.components.register('additional-output', {
 });
 
 ko.components.register('collapsible', {
+    /**
+     * @param {ParamsObject} params
+     */
     viewModel: function (params) {
         this.target = '#' + params.id;
         this.heading = params.heading;
@@ -210,6 +252,9 @@ ko.components.register('collapsible', {
 
                         return true;
                     },
+                    /**
+                     * @param {boolean} checked
+                     */
                     write: (checked) => {
                         for (var n of this.items)
                             n.checked(checked);
@@ -303,9 +348,11 @@ ko.components.register('consumer-module', {
 });
 
 ko.components.register('consumer-entry', {
+    /**
+     * @param {Demand} demand
+     */
     viewModel: function (demand) {
         this.demand = demand;
-
 
         this.component = "consumer-unknown";
 
@@ -321,6 +368,9 @@ ko.components.register('consumer-entry', {
 });
 
 ko.components.register('consumer-view', {
+    /**
+     * @param {ParamsObject} params
+     */
     viewModel: function (params) {
         this.factory = params.factory;
         this.populationLevelIndices = new Map();

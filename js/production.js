@@ -1,12 +1,21 @@
 // @ts-check
 import { EPSILON, NamedElement, Option } from './util.js'
 
+/** @typedef {import('./types.js').PopulationNeed} PopulationNeed */
+/** @typedef {import('./types.js').Need} Need */
+/** @typedef {import('./types.js').Factory} Factory */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').AssetsMap} AssetsMap */
+
 var ko = require( "knockout" );
 
 export class Product extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
-
 
         //this.amount = ko.observable(0);
 
@@ -27,12 +36,20 @@ export class Product extends NamedElement {
 }
 
 export class MetaProduct extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
     }
 }
 
 export class NoFactoryProduct extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
 
@@ -49,15 +66,19 @@ export class NoFactoryProduct extends NamedElement {
         });
     }
 
+    /**
+     * @param {PopulationNeed|Need} need
+     */
     addNeed(need) {
         this.needs.push(need);
     }
 }
 
-
-
-
 export class Demand extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
 
@@ -75,9 +96,11 @@ export class Demand extends NamedElement {
             this.product.fixedFactory.subscribe(f => this.updateFixedProductFactory(f));
         }
 
-
     }
 
+    /**
+     * @param {unknown} f
+     */
     updateFixedProductFactory(f) {
         if (f == null && (this.consumer || this.region)) { // find factory in the same region as consumer
             let region = this.region || this.consumer.region;
@@ -103,6 +126,9 @@ export class Demand extends NamedElement {
         }
     }
 
+    /**
+     * @param {number} amount
+     */
     updateAmount(amount) {
         amount *= this.factor;
         if (Math.abs(this.amount() - amount) >= EPSILON)
@@ -110,9 +136,11 @@ export class Demand extends NamedElement {
     }
 }
 
-
-
 export class ProductCategory extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
         this.products = config.products.map(p => assetsMap.get(p)).filter(p => p != null && p instanceof Product);
@@ -120,13 +148,17 @@ export class ProductCategory extends NamedElement {
 }
 
 export class Item extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     * @param {unknown} region
+     */
     constructor(config, assetsMap, region) {
         super(config);
 
         if (this.replaceInputs) {
             this.replacements = new Map();
             this.replacementArray = [];
-
 
             this.replaceInputs.forEach(r => {
                 this.replacementArray.push({
@@ -157,7 +189,6 @@ export class Item extends NamedElement {
         if (this.replacingWorkforce)
             this.replacingWorkforce = assetsMap.get(this.replacingWorkforce);
 
-
         this.equipments =
             this.factories.map(f => new EquippedItem({ item: this, factory: f, icon: this.icon, locaText: this.locaText, dlcs: config.dlcs }, assetsMap));
         this.availableEquipments = ko.pureComputed(() => this.equipments.filter(e => e.factory.available()));
@@ -170,6 +201,9 @@ export class Item extends NamedElement {
 
                 return true;
             },
+            /**
+             * @param {boolean} checked
+             */
             write: (checked) => {
                 this.equipments.forEach(e => e.checked(checked));
             }
@@ -200,6 +234,10 @@ export class Item extends NamedElement {
 }
 
 class EquippedItem extends Option {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
 
@@ -238,6 +276,10 @@ class EquippedItem extends Option {
 }
 
 class ExtraGoodProduction {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         this.item = config.item;
         this.factory = config.factory;
@@ -262,6 +304,9 @@ class ExtraGoodProduction {
 }
 
 export class ExtraGoodProductionList {
+    /**
+     * @param {Factory} factory
+     */
     constructor(factory) {
         this.factory = factory;
 

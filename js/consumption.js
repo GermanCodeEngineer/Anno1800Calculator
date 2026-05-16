@@ -1,13 +1,20 @@
 // @ts-check
 import { EPSILON, createFloatInput, NamedElement, Option } from './util.js'
 import { Demand } from './production.js'
-import { ResidenceBuilding } from './population.js';
+import { PopulationLevel, ResidenceBuilding } from './population.js';
 
-var ko = require( "knockout" );
+/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').ListObject} ListObject */
+/** @typedef {import('./types.js').AssetsMap} AssetsMap */
 
-
+var ko = require("knockout");
 
 export class Need extends Demand {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config, assetsMap);
         this.isNeed = true;
@@ -17,9 +24,8 @@ export class Need extends Demand {
 
 export class ResidenceNeed {
     /**
-     * 
-     * @param {ResidenceBuilding} residence 
-     * @param {PopulationNeed} need 
+     * @param {ResidenceBuilding} residence
+    * @param {PopulationNeed} need
      */
     constructor(residence, need) {
         this.residence = residence;
@@ -57,10 +63,13 @@ export class ResidenceNeed {
         })
     }
 
+    /**
+     * @param {Map<number, ResidenceNeed>} residenceNeedsMap
+     */
     initDependencies(residenceNeedsMap){
         this.residenceNeedsMap = residenceNeedsMap;
         this.substitutionSubscription = ko.computed(() => {
-            /** @type [ResidenceEffectEntryCoverage] */
+            /** @type {Array<ResidenceEffectEntryCoverage>} */
             var arr = this.residence.getConsumptionEntries(this.need);
             if(arr == null)
                 return; // no effect for this product
@@ -97,6 +106,11 @@ export class ResidenceNeed {
 }
 
 export class PublicBuildingNeed extends Option {
+    /**
+     * @param {ConfigObject} config
+     * @param {PopulationLevel} level
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, level, assetsMap) {
         super(config);
 
@@ -114,6 +128,11 @@ export class PublicBuildingNeed extends Option {
 }
 
 export class NoFactoryNeed extends PublicBuildingNeed {
+    /**
+     * @param {ConfigObject} config
+     * @param {PopulationLevel} level
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, level, assetsMap) {
         super(config, level, assetsMap);
         this.level = level;
@@ -135,6 +154,11 @@ export class NoFactoryNeed extends PublicBuildingNeed {
 }
 
 export class PopulationNeed extends Need {
+    /**
+     * @param {ConfigObject} config
+     * @param {PopulationLevel} level
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, level, assetsMap) {
         super(config, assetsMap);
         this.level = level;
@@ -147,6 +171,9 @@ export class PopulationNeed extends Need {
         this.initAggregation(assetsMap);
     }
 
+    /**
+     * @param {AssetsMap} assetsMap
+     */
     initHidden(assetsMap){
         this.banned = ko.observable(false);
         this.isInactive = ko.observable(false);
@@ -185,13 +212,15 @@ export class PopulationNeed extends Need {
         });
     }
 
+    /**
+     * @param {AssetsMap} assetsMap
+     */
     initAggregation(assetsMap) {
         this.region = this.level.region;        
 
         this.checked = ko.observable(true);
 
         this.notes = ko.observable("");   
-
 
         this.residenceNeedsSubscription = ko.computed(() => {
             var sum = 0;
@@ -201,9 +230,12 @@ export class PopulationNeed extends Need {
             this.amount(sum);
         });
 
-
     }
 
+    /**
+     * @param {PopulationLevel} level
+     * @param {AssetsMap} assetsMap
+     */
     initBans(level, assetsMap) {
         if (this.unlockCondition) {
             var config = this.unlockCondition;
@@ -246,6 +278,9 @@ export class PopulationNeed extends Need {
 
     }
 
+    /**
+     * @param {number} population
+     */
     updateAmount(population) { }
 }
 
@@ -276,6 +311,9 @@ export class NewspaperNeedConsumption {
         });
     }
 
+    /**
+     * @param {ResidenceEffect|NewspaperNeedConsumptionEntry} effect
+     */
     add(effect) {
         this.allEffects.push(effect);
         effect.checked.subscribe(checked => {
@@ -321,6 +359,9 @@ export class NewspaperNeedConsumption {
 }
 
 export class NewspaperNeedConsumptionEntry extends Option {
+    /**
+     * @param {ConfigObject} config
+     */
     constructor(config) {
         super(config);
 
@@ -333,6 +374,10 @@ export class NewspaperNeedConsumptionEntry extends Option {
 }
 
 class ResidenceEffectEntry {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         this.guid = parseInt(config.guid);
         this.product = assetsMap.get(this.guid);
@@ -343,6 +388,10 @@ class ResidenceEffectEntry {
 }
 
 export class ResidenceEffect extends NamedElement {
+    /**
+     * @param {ConfigObject} config
+     * @param {AssetsMap} assetsMap
+     */
     constructor(config, assetsMap) {
         super(config);
         this.entries = config.effects.map(e => new ResidenceEffectEntry(e, assetsMap));
@@ -361,7 +410,6 @@ export class ResidenceEffect extends NamedElement {
     }
 
     /**
-     * 
      * Expected usage: array.sort((a,b) => a.compare(b))
      * @param {ResidenceEffect} other
      */
@@ -383,6 +431,7 @@ export class ResidenceEffectCoverage {
     /**
      * @param {ResidenceBuilding} residence
      * @param {ResidenceEffect} residenceEffect
+        * @param {number} coverage
      */
     constructor(residence, residenceEffect, coverage = 1) {
         this.residence = residence;
@@ -394,7 +443,7 @@ export class ResidenceEffectCoverage {
 export class ResidenceEffectEntryCoverage{
     /**
      * @param {ResidenceEffectCoverage} residenceEffectCoverage
-     * @param {ResidenceEffectEntry} residenceEffectEntry
+    * @param {ResidenceEffectEntry} residenceEffectEntry
      */
         constructor(residenceEffectCoverage, residenceEffectEntry) {
         this.residenceEffectCoverage = residenceEffectCoverage;
@@ -407,6 +456,11 @@ export class ResidenceEffectEntryCoverage{
 }
 
 export class RecipeList extends NamedElement {
+    /**
+     * @param {ListObject} list
+     * @param {AssetsMap} assetsMap
+     * @param {Island} island
+     */
     constructor(list, assetsMap, island) {
         super(list);
 

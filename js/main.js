@@ -56,16 +56,25 @@ for (var code in languageCodes)
 
 // called after initialization
 // checks if loaded config is old and applies upgrade
+/**
+ * @param {unknown} configVersion
+ */
 function configUpgrade(configVersion) {
     if (configVersion == null)
         configVersion = "v1.0";
 
     try {
         configVersion = configVersion.replace(/[^.\d]/g, "").split(".").map(d => parseInt(d));
+        /**
+         * @param {string} settingName
+         */
         function isChecked(settingName) {
             var val = localStorage.getItem(`settings.${settingName}`);
             return val != null && parseInt(val);
         }
+        /**
+         * @param {string} settingName
+         */
         function remove(settingName) {
             localStorage.removeItem(`settings.${settingName}`);
         }
@@ -390,6 +399,10 @@ class PopulationReader {
 
 
 
+/**
+ * @param {boolean} isFirstRun
+ * @param {unknown} configVersion
+ */
 function init(isFirstRun, configVersion) {
     view.darkMode = new DarkMode();
 
@@ -540,6 +553,9 @@ function init(isFirstRun, configVersion) {
     var allIslands = view.islandManager.allIslands;
     var selectedIsland = view.island();
     var templates = [];
+    /**
+     * @param {string} name
+     */
     var arrayToTemplate = (name) => allIslands[name].map((asset, index) => {
         var t = new Template(asset, selectedIsland, name, index);
         templates.push(t);
