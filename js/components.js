@@ -3,19 +3,27 @@ import { PopulationNeed } from './consumption.js';
 import { Consumer } from './factories.js';
 import { NumberInputHandler, EPSILON } from './util.js'
 
-/** @typedef {import('./types.js').ResidenceBuilding} ResidenceBuilding */
+/** @typedef {import('./types.js').AssetIconModel} AssetIconModel */
+/** @typedef {import('./types.js').ComponentInfo} ComponentInfo */
 /** @typedef {import('./types.js').Demand} Demand */
+/** @typedef {import('./types.js').ExistingBuildingsAsset} ExistingBuildingsAsset */
 /** @typedef {import('./types.js').ParamsObject} ParamsObject */
+/** @typedef {import('./types.js').ResidenceBuilding} ResidenceBuilding */
+/** @typedef {import('./types.js').AppWindow} AppWindow */
+/** @typedef {import('./types.js').WithPropertiesBindingContext} WithPropertiesBindingContext */
+/** @typedef {import('./types.js').WithPropertiesValueAccessor} WithPropertiesValueAccessor */
 
 var ko = require("knockout");
 
+const appWindow = /** @type {AppWindow} */ (/** @type {unknown} */ (window));
+
 ko.bindingHandlers.withProperties = {
     /**
-     * @param {unknown} element
-     * @param {unknown} valueAccessor
-     * @param {unknown} allBindings
-     * @param {unknown} viewModel
-     * @param {unknown} bindingContext
+    * @param {Node} element
+    * @param {WithPropertiesValueAccessor} valueAccessor
+    * @param {unknown} allBindings - Provided by Knockout; shape depends on other active bindings and is not used here.
+    * @param {unknown} viewModel - Provided by Knockout; view-model type varies by binding host and is not used here.
+    * @param {WithPropertiesBindingContext} bindingContext
      */
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // Make a modified binding context, with a extra properties, and apply it to descendant elements
@@ -38,7 +46,7 @@ ko.components.register('number-input-increment', {
         //   nodes that have been supplied to the component. See below.
         /**
          * @param {ParamsObject} params
-         * @param {unknown} componentInfo
+         * @param {ComponentInfo} componentInfo
          */
         createViewModel: (params, componentInfo) => new NumberInputHandler(params)
     },
@@ -66,7 +74,7 @@ ko.components.register('lock-toggle', {
 
 ko.components.register('asset-icon', {
     /**
-     * @param {unknown} asset
+    * @param {AssetIconModel} asset
      */
     viewModel: function (asset) {
         this.asset = asset;
@@ -81,7 +89,7 @@ ko.components.register('factory-header', {
     viewModel: function (params) {
         this.$data = params.data;
         this.hasButton = params.button;
-        this.$root = window.view;
+        this.$root = appWindow.view;
     },
     template:
         `<div class="ui-fchain-item-tr-button" data-bind="if: hasButton">
@@ -122,7 +130,7 @@ ko.components.register('residence-effect-entry', {
     viewModel: function (params) {
         this.entries = params.entries;
         this.filter = params.filter;
-        this.texts = window.view.texts;
+        this.texts = appWindow.view.texts;
     },
     template:
         `<div class="inline-list-centered" data-bind="foreach: entries">
@@ -172,11 +180,11 @@ ko.components.register('replacement', {
 
 ko.components.register('existing-buildings-input', {
     /**
-     * @param {unknown} asset
+    * @param {ExistingBuildingsAsset} asset
      */
     viewModel: function (asset) {
         this.asset = asset;
-        this.texts = window.view.texts;
+        this.texts = appWindow.view.texts;
     }, template:
         `<div class="input-group input-group-short spinner float-left" style="max-width: 10rem;">
             <div class="input-group-prepend" data-bind="src: {title: texts.residences.name()}">
@@ -217,7 +225,7 @@ ko.components.register('additional-output', {
      */
     viewModel: function (params) {
         this.amount = params.amount;
-        this.texts = window.view.texts;
+        this.texts = appWindow.view.texts;
     }, template:
         `<div data-bind="src: { title: texts.extraGoods.name}">
             <img class="icon-sm icon-light mr-2" src="icons/icon_add_goods_socket_white.png"/>
@@ -232,7 +240,7 @@ ko.components.register('collapsible', {
     viewModel: function (params) {
         this.target = '#' + params.id;
         this.heading = params.heading;
-        this.collapser = window.view.collapsibleStates.get(params.id, params.collapsed);
+        this.collapser = /** @type {any} */ (appWindow.view.collapsibleStates).get(params.id, params.collapsed);
         this.cssClass = ko.pureComputed(() => this.collapser.collapsed() ? "hide" : "show");
         this.fieldsetClass = params.fieldsetClass ? params.fieldsetClass : "collapsible-section";
         this.data = params.data;
@@ -420,3 +428,4 @@ ko.components.register('consumer-view', {
             </tbody>
          </table>`
 });
+

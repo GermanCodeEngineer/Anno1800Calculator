@@ -4,9 +4,9 @@ import { Workforce, WorkforceDemand } from './population.js'
 import { ExtraGoodProductionList, Demand} from './production.js'
 import { TradeList, ContractList } from './trade.js'
 
-/** @typedef {import('./types.js').Island} Island */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
 /** @typedef {import('./types.js').AssetsMap} AssetsMap */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').Island} Island */
 
 var ko = require("knockout");
 

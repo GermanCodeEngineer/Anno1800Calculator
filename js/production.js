@@ -1,11 +1,12 @@
 // @ts-check
 import { EPSILON, NamedElement, Option } from './util.js'
 
-/** @typedef {import('./types.js').PopulationNeed} PopulationNeed */
-/** @typedef {import('./types.js').Need} Need */
-/** @typedef {import('./types.js').Factory} Factory */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
 /** @typedef {import('./types.js').AssetsMap} AssetsMap */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').Factory} Factory */
+/** @typedef {import('./types.js').Need} Need */
+/** @typedef {import('./types.js').PopulationNeed} PopulationNeed */
+/** @typedef {import('./types.js').Region} Region */
 
 var ko = require( "knockout" );
 
@@ -99,7 +100,7 @@ export class Demand extends NamedElement {
     }
 
     /**
-     * @param {unknown} f
+     * @param {Factory|null|undefined} f
      */
     updateFixedProductFactory(f) {
         if (f == null && (this.consumer || this.region)) { // find factory in the same region as consumer
@@ -151,7 +152,7 @@ export class Item extends NamedElement {
     /**
      * @param {ConfigObject} config
      * @param {AssetsMap} assetsMap
-     * @param {unknown} region
+        * @param {Region|null} region
      */
     constructor(config, assetsMap, region) {
         super(config);

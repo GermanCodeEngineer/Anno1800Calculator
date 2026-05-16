@@ -6,8 +6,14 @@ import { ProductCategory, Product, Demand } from './production.js'
 import { Consumer, Factory } from './factories.js'
 
 /** @typedef {import('./types.js').Need} Need */
+/** @typedef {import('./types.js').ProductionTreeNode} ProductionTreeNode */
+/** @typedef {import('./types.js').TemplateAsset} TemplateAsset */
+/** @typedef {import('./types.js').TemplateParentInstance} TemplateParentInstance */
+/** @typedef {import('./types.js').AppWindow} AppWindow */
 
 var ko = require( "knockout" );
+
+const appWindow = /** @type {AppWindow} */ (window);
 
 export class DarkMode {
     constructor() {
@@ -87,8 +93,8 @@ export class ViewMode {
 
 export class Template {
     /**
-     * @param {unknown} asset
-     * @param {unknown} parentInstance
+    * @param {TemplateAsset} asset
+    * @param {TemplateParentInstance} parentInstance
      * @param {string} attributeName
      * @param {number} index
      */
@@ -138,7 +144,7 @@ export class Template {
     }
 
     /**
-     * @param {unknown} asset
+        * @param {unknown} asset - Runtime value can be any nested candidate; type narrowing is performed with instanceof checks.
      */
     applicable(asset) {
         return asset instanceof PopulationLevel ||
@@ -227,7 +233,7 @@ export class ProductionChainView {
                 return 0;
 
             /**
-             * @param {unknown} node
+             * @param {ProductionTreeNode} node
              */
             var traverse = node => Math.max(1, (node.children || []).map(n => traverse(n)).reduce((a,b) => a +b, 0));
 
@@ -238,7 +244,7 @@ export class ProductionChainView {
 
 class ResidenceEffectAggregate {
     /**
-     * @param {unknown} totalResidences
+    * @param {KnockoutComputed<number>} totalResidences
      * @param {ResidenceEffectCoverage} residenceEffectCoverage
      */
     constructor(totalResidences, residenceEffectCoverage) {
@@ -267,12 +273,12 @@ class ResidenceEffectAggregate {
 
 export class ResidenceEffectView {
     /**
-     * @param {unknown} residences
-     * @param {unknown} heading
+    * @param {Array<ResidenceBuilding>} residences
+    * @param {string|null} heading
      * @param {PopulationNeed|Need} need
      */
     constructor(residences, heading = null, need = null) {
-        this.heading = heading || window.view.texts.needConsumption.name;
+        this.heading = heading || appWindow.view.texts.needConsumption.name;
         this.residences = residences.filter(r => r.available());
         this.percentCoverage = ko.observable(100);
 
@@ -353,7 +359,7 @@ export class ResidenceEffectView {
     }
 
     /**
-     * @param {unknown} aggregate
+        * @param {ResidenceEffectAggregate} aggregate
      */
     delete(aggregate) {
         aggregate.coverage.forEach(coverage => {
@@ -436,3 +442,4 @@ export class CollapsibleStates {
         return c;
     }
 }
+

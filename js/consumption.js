@@ -3,12 +3,19 @@ import { EPSILON, createFloatInput, NamedElement, Option } from './util.js'
 import { Demand } from './production.js'
 import { PopulationLevel, ResidenceBuilding } from './population.js';
 
-/** @typedef {import('./types.js').Island} Island */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').ListObject} ListObject */
 /** @typedef {import('./types.js').AssetsMap} AssetsMap */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.js').ListObject} ListObject */
+/** @typedef {import('./types.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
+/** @typedef {import('./types.js').PopulationNeed} PopulationNeed */
+/** @typedef {import('./types.js').ResidenceEffect} ResidenceEffect */
+/** @typedef {import('./types.js').ResidenceEffectCoverage} ResidenceEffectCoverage */
+/** @typedef {import('./types.js').AppWindow} AppWindow */
 
 var ko = require("knockout");
+
+const appWindow = /** @type {AppWindow} */ (window);
 
 export class Need extends Demand {
     /**
@@ -36,7 +43,7 @@ export class ResidenceNeed {
 
         if(this.need.amount){
             this.amount = ko.pureComputed(() => {
-                var newspaper = (100 + window.view.newspaperConsumption.amount()) / 100;
+                var newspaper = (100 + appWindow.view.newspaperConsumption.amount()) / 100;
                 var total = this.residence.consumingLimit() * this.need.tpmin * newspaper;
                 return total * (Math.max(0, this.fulfillment() - this.substitution()));
             });
@@ -505,3 +512,4 @@ export class RecipeList extends NamedElement {
         this.selectedRecipe().existingBuildings(1);
     }
 }
+

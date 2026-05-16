@@ -1,10 +1,14 @@
 // @ts-check
 
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').ParamsObject} ParamsObject */
 /** @typedef {import('./types.js').AssetsMap} AssetsMap */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').InputTransformCallback} InputTransformCallback */
+/** @typedef {import('./types.js').ParamsObject} ParamsObject */
+/** @typedef {import('./types.js').AppWindow} AppWindow */
 
 var ko = require( "knockout" );
+
+const appWindow = /** @type {AppWindow} */ (window);
 
 export let versionCalculator = "v11.1";
 export let isPreview = false;
@@ -26,7 +30,7 @@ export function setDefaultFixedFactories(assetsMap) {
 }
 
 /**
- * @param {unknown} string
+ * @param {string|(() => string)} string
  */
 function removeSpaces(string) {
     if (typeof string === "function")
@@ -36,7 +40,7 @@ function removeSpaces(string) {
 
 var formater = new Intl.NumberFormat(navigator.language || "en").format;
 /**
- * @param {unknown} num
+ * @param {number|string} num
  * @param {boolean} forceSign
  */
 export function formatNumber(num, forceSign = false) {
@@ -93,16 +97,17 @@ export class NumberInputHandler {
 }
 
 /**
- * @param {unknown} number
+ * @param {number|string} number
  * @param {boolean} forceSign
  */
 export function formatPercentage(number, forceSign = true) {
-    return window.formatNumber(Math.ceil(10 * parseFloat(number)) / 10, forceSign) + ' %';
+    return appWindow.formatNumber(Math.ceil(10 * parseFloat(number)) / 10, forceSign) + ' %';
 }
 
 /**
- * @param {KnockoutObservable<unknown>} obs
- * @param {unknown} val
+ * @template T
+ * @param {KnockoutObservable<T>} obs
+ * @param {T} val
  */
 export function delayUpdate(obs, val) {
     var version = obs.getVersion ? obs.getVersion() : obs();
@@ -118,7 +123,7 @@ ko.extenders.numeric = function (target, bounds) {
     var result = ko.computed({
         read: target,  //always return the original observables value
         /**
-         * @param {unknown} newValue
+         * @param {string|number} newValue
          */
         write: function (newValue) {
             var current = target();
@@ -177,7 +182,7 @@ ko.extenders.numeric = function (target, bounds) {
  * @param {number} init
  * @param {number} min
  * @param {number} max
- * @param {unknown} callback
+ * @param {InputTransformCallback|null} callback
  */
 export function createIntInput(init, min = -Infinity, max = Infinity, callback = null) {
     return ko.observable(init).extend({
@@ -194,7 +199,7 @@ export function createIntInput(init, min = -Infinity, max = Infinity, callback =
  * @param {number} init
  * @param {number} min
  * @param {number} max
- * @param {unknown} callback
+ * @param {InputTransformCallback|null} callback
  */
 export function createFloatInput(init, min = -Infinity, max = Infinity, callback = null) {
     return ko.observable(init).extend({
@@ -312,4 +317,5 @@ export class DLC extends Option {
         this.dependentObjects.remove(obs);
     }
 }
+
 

@@ -3,8 +3,8 @@ import { ACCURACY, ALL_ISLANDS, createIntInput, createFloatInput, NamedElement, 
 import { Product } from './production.js'
 import { Factory } from './factories.js'
 
-/** @typedef {import('./types.js').Island} Island */
 /** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').Island} Island */
 /** @typedef {import('./types.js').ListObject} ListObject */
 
 var ko = require( "knockout" );
@@ -381,7 +381,7 @@ class TradeContract {
         this.exportAmount = ko.pureComputed({
             read: () => this.ratio() * this.importAmount(),
             /**
-             * @param {unknown} val
+             * @param {number|string} val
              */
             write: val => this.importAmount(parseFloat(val) / this.ratio())
         });

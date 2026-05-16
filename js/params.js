@@ -1,5 +1,7 @@
+/** @typedef {import('./types.js').AppWindow} AppWindow */
+const appWindow = /** @type {AppWindow} */ (window);
 
-if(window.params == null)window.params={
+if(appWindow.params == null)appWindow.params={
     "dlcs": [
         {
             "guid": 4100010,

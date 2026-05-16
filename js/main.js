@@ -1,14 +1,12 @@
 import { ACCURACY, isPreview, formatNumber, formatPercentage, versionCalculator, NamedElement, Option, DLC } from './util.js'
 import { languageCodes, texts as locaTexts, options, serverOptions } from './i18n.js'
 
-
 import { PopulationLevel, ResidenceBuilding } from './population.js'
 import { NewspaperNeedConsumption, NewspaperNeedConsumptionEntry } from './consumption.js'
 import { Consumer } from './factories.js'
 import { NPCTrader, ContractUpgradeManager, TradeManager, ContractCreatorFactory } from './trade.js'
 import { Region, Session, IslandManager } from './world.js'
 import { DarkMode, ViewMode, Template, ProductionChainView, ResidenceEffectView, CollapsibleStates } from './views.js'
-
 
 import './components.js'
 import './params.js'
@@ -17,6 +15,8 @@ var ko = require("knockout");
 require("knockout-amd-helpers");
 
 // @ts-check
+
+/** @typedef {import('./types.js').AppWindow} AppWindow */
 
 var moduleContext = require.context(".", true);
 var templateContext = require.context("../templates", true);
@@ -32,13 +32,15 @@ ko.amdTemplateEngine.loader = function (templateName, done) {
     done(template.default);
 }
 
-window.ACCURACY = ACCURACY;
-window.formatNumber = formatNumber;
-window.formatPercentage = formatPercentage;
-window.factoryReset = factoryReset;
-window.exportConfig = exportConfig;
+const appWindow = /** @type {AppWindow} */ (window);
 
-window.view = {
+appWindow.ACCURACY = ACCURACY;
+appWindow.formatNumber = formatNumber;
+appWindow.formatPercentage = formatPercentage;
+appWindow.factoryReset = factoryReset;
+appWindow.exportConfig = exportConfig;
+
+appWindow.view = {
     settings: {
         language: ko.observable("english"),
         options: [],
@@ -57,7 +59,7 @@ for (var code in languageCodes)
 // called after initialization
 // checks if loaded config is old and applies upgrade
 /**
- * @param {unknown} configVersion
+ * @param {string|null|undefined} configVersion
  */
 function configUpgrade(configVersion) {
     if (configVersion == null)
@@ -261,7 +263,7 @@ class PopulationReader {
 
         // only ping the server when the website is run locally
         if (isLocal()) {
-            console.log('waiting for responses from ' + window.view.settings.serverAddress());
+            console.log('waiting for responses from ' + appWindow.view.settings.serverAddress());
             this.requestInterval = setInterval(this.handleResponse.bind(this), 1000);
 
             $.getJSON("https://api.github.com/repos/NiHoel/Anno1800UXEnhancer/releases/latest").done((release) => {
@@ -272,7 +274,7 @@ class PopulationReader {
     }
 
     async handleResponse() {
-        let host = window.view.settings.serverAddress();
+        let host = appWindow.view.settings.serverAddress();
         localStorage.setItem('serverAddress', host);
         let url_with_params = 'http://' + host + ":8000/AnnoServer/Population?" +
             jQuery.param({
@@ -292,7 +294,6 @@ class PopulationReader {
                 this.checkVersion();
             }
 
-
             if (view.settings.proposeIslandNames.checked()) {
                 for (var isl of (json.islands || [])) {
                     view.islandManager.registerName(isl.name, view.assetsMap.get(isl.session));
@@ -310,7 +311,6 @@ class PopulationReader {
             if (view.settings.updateSelectedIslandOnly.checked() && island != view.island())
                 return;
 
-
             for (let key in json) {
                 let asset = island.assetsMap.get(parseInt(key));
                 if (asset instanceof PopulationLevel) {
@@ -321,7 +321,6 @@ class PopulationReader {
                     if (json[key].existingBuildings && view.settings.populationLevelExistingBuildings.checked()) {
                         asset.existingBuildings(json[key].existingBuildings);
                     }
-
 
                 } else if (asset instanceof Consumer) {
                     if (json[key].existingBuildings && view.settings.factoryExistingBuildings.checked())
@@ -394,14 +393,11 @@ class PopulationReader {
         }
     }
 
-
 }
-
-
 
 /**
  * @param {boolean} isFirstRun
- * @param {unknown} configVersion
+ * @param {string|null|undefined} configVersion
  */
 function init(isFirstRun, configVersion) {
     view.darkMode = new DarkMode();
@@ -531,7 +527,6 @@ function init(isFirstRun, configVersion) {
     else
         localStorage.setItem("upgrade.bonusResidentsApplied", 1);
 
-
     // set up modal dialogs
     view.collapsibleStates = new CollapsibleStates();
     view.selectedFactory = ko.observable(view.island().factories[0]);
@@ -541,8 +536,6 @@ function init(isFirstRun, configVersion) {
     view.selectedExtraGoodItems = ko.observable(view.island().extraGoodItems);
     view.selectedContractManager = ko.observable(view.island().contractManager);
     view.selectedResidenceEffectView = ko.observable(new ResidenceEffectView([view.island().residenceBuildings[0]]));
-
-
 
     view.tradeManager = new TradeManager();
 
@@ -606,7 +599,6 @@ function init(isFirstRun, configVersion) {
         }
     });
 
-
     if (view.viewMode)
         $('#view-mode-dialog').modal("show");
 
@@ -659,13 +651,10 @@ function init(isFirstRun, configVersion) {
         }
     });
 
-
     if(!isPreview)
         // listen for the server providing the population count
-        window.reader = new PopulationReader();
+        appWindow.reader = new PopulationReader();
 }
-
-
 
 $(document).ready(function () {
     var configVersion = localStorage && localStorage.getItem("versionCalculator");
@@ -703,3 +692,4 @@ $(document).ready(function () {
     $('[data-toggle="popover"]').popover();
     installImportConfigListener(); // must occur after template binding
 })
+

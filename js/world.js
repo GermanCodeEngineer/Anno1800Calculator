@@ -2,9 +2,12 @@
 import { ALL_ISLANDS, setDefaultFixedFactories, NamedElement, Option } from './util.js'
 import { texts } from './i18n.js'
 
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').ParamsObject} ParamsObject */
 /** @typedef {import('./types.js').AssetsMap} AssetsMap */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.js').ParamsObject} ParamsObject */
+/** @typedef {import('./types.js').Session} Session */
+/** @typedef {import('./types.js').AppWindow} AppWindow */
 
 import { CommuterWorkforce, Workforce, ResidenceBuilding, PopulationLevel } from './population.js'
 import { ResidenceEffect, RecipeList } from './consumption.js'
@@ -14,6 +17,8 @@ import { ContractManager } from './trade.js'
 import {ResidenceEffectView} from './views.js'
 
 var ko = require("knockout");
+
+const appWindow = /** @type {AppWindow} */ (window);
 
 class Storage {
     /**
@@ -130,14 +135,14 @@ export class Session extends NamedElement {
     }
 
     /**
-     * @param {unknown} isl
+     * @param {Island} isl
      */
     addIsland(isl) {
         this.islands.push(isl);
     }
 
     /**
-     * @param {unknown} isl
+     * @param {Island} isl
      */
     deleteIsland(isl) {
         this.islands.remove(isl);
@@ -157,7 +162,7 @@ export class Island {
             this.name.subscribe(name => this.storage.updateKey(name));
             this.isAllIslands = function () { return false; };
         } else {
-            this.name = ko.computed(() => window.view.texts.allIslands.name());
+            this.name = ko.computed(() => appWindow.view.texts.allIslands.name());
             this.isAllIslands = function () { return true; };
         }
         this.storage = localStorage;
@@ -536,8 +541,8 @@ export class Island {
 
         this.top2Population = ko.computed(() => {
             /**
-             * @param {unknown} a
-             * @param {unknown} b
+             * @param {PopulationLevel} a
+             * @param {PopulationLevel} b
              */
             var comp = (a, b) => b.residents() - a.residents();
 
@@ -995,4 +1000,5 @@ export class IslandManager {
         return lookup[m][n];
     }
 }
+
 

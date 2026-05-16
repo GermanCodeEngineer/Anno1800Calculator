@@ -4,15 +4,16 @@ import { MetaProduct, NoFactoryProduct, Product } from './production.js'
 import { NoFactoryNeed, PopulationNeed, PublicBuildingNeed, ResidenceEffectCoverage, ResidenceEffectEntryCoverage, ResidenceNeed } from './consumption.js'
 import { ResidenceEffectView} from './views.js'
 
-/** @typedef {import('./types.js').Island} Island */
-/** @typedef {import('./types.js').ResidenceEffect} ResidenceEffect */
-/** @typedef {import('./types.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
-/** @typedef {import('./types.js').Need} Need */
-/** @typedef {import('./types.js').Session} Session */
-/** @typedef {import('./types.js').Demand} Demand */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').JsonObject} JsonObject */
 /** @typedef {import('./types.js').AssetsMap} AssetsMap */
+/** @typedef {import('./types.js').ConfigObject} ConfigObject */
+/** @typedef {import('./types.js').Demand} Demand */
+/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.js').JsonObject} JsonObject */
+/** @typedef {import('./types.js').Need} Need */
+/** @typedef {import('./types.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
+/** @typedef {import('./types.js').ResidenceEffect} ResidenceEffect */
+/** @typedef {import('./types.js').Session} Session */
+/** @typedef {import('./types.js').Workforce} Workforce */
 
 var ko = require( "knockout" );
 
@@ -65,7 +66,7 @@ export class ResidenceBuilding extends NamedElement {
     }
 
     /**
-     * @param {unknown} needsMap
+        * @param {Map<number, Need>} needsMap
      */
     initializeNeeds(needsMap){
         this.needsMap = needsMap;
@@ -251,7 +252,7 @@ export class PopulationLevel extends NamedElement {
             },
 
             /**
-             * @param {unknown} val
+             * @param {number} val
              */
             write: val => {
                 if(this.canEdit())
@@ -311,7 +312,7 @@ export class PopulationLevel extends NamedElement {
         this.residentsInput = ko.pureComputed({
             read: () => formatNumber(this.residents()),
             /**
-             * @param {unknown} val
+             * @param {string} val
              */
             write: val => {
                 val = parseInt(val.replace(/[^\d]/g, ""));
