@@ -1,19 +1,19 @@
 // @ts-check
-import { ALL_ISLANDS, setDefaultFixedFactories, NamedElement, Option } from './util.js'
-import { texts } from './i18n.js'
+import { ALL_ISLANDS, setDefaultFixedFactories, NamedElement, Option } from './util.ts'
+import { texts } from './i18n.ts'
+import type { AssetsMap, ConfigObject, ParamsObject, AppWindow } from './types.ts'
 
-/** @typedef {import('./types.js').AssetsMap} AssetsMap */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').ParamsObject} ParamsObject */
-/** @typedef {import('./types.js').AppWindow} AppWindow */
+// NOTE: In TypeScript, use 'import type { ... } from ...' or direct type imports instead of @typedef JSDoc comments.
+// /** @typedef {import('./types.ts').AssetsMap} AssetsMap */
+// ...existing code...
 /** @typedef {{name: string, session: Session}} IslandNameCandidate */
 
-import { CommuterWorkforce, Workforce, ResidenceBuilding, PopulationLevel } from './population.js'
-import { ResidenceEffect, RecipeList } from './consumption.js'
-import { NoFactoryProduct, Product, MetaProduct, Item, ProductCategory } from './production.js'
-import { PublicConsumerBuilding, Module, Factory, Consumer, Buff, PowerPlant } from './factories.js'
-import { ContractManager } from './trade.js'
-import {ResidenceEffectView} from './views.js'
+import { CommuterWorkforce, Workforce, ResidenceBuilding, PopulationLevel } from './population.ts'
+import { ResidenceEffect, RecipeList } from './consumption.ts'
+import { NoFactoryProduct, Product, MetaProduct, Item, ProductCategory } from './production.ts'
+import { PublicConsumerBuilding, Module, Factory, Consumer, Buff, PowerPlant } from './factories.ts'
+import { ContractManager } from './trade.ts'
+import {ResidenceEffectView} from './views.ts'
 
 var ko = require("knockout");
 

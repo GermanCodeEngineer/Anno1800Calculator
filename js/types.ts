@@ -6,24 +6,25 @@
 /** @typedef {Record<string, unknown>} ListObject */
 /** @typedef {Map<number, unknown>} AssetsMap */
 
-/** @typedef {import('./world.js').Island} Island */
-/** @typedef {import('./world.js').Region} Region */
-/** @typedef {import('./world.js').Session} Session */
-/** @typedef {import('./factories.js').Consumer} Consumer */
-/** @typedef {import('./factories.js').Factory} Factory */
-/** @typedef {import('./production.js').Demand} Demand */
-/** @typedef {import('./consumption.js').Need} Need */
-/** @typedef {import('./consumption.js').PopulationNeed} PopulationNeed */
-/** @typedef {import('./consumption.js').ResidenceEffect} ResidenceEffect */
-/** @typedef {import('./consumption.js').ResidenceEffectCoverage} ResidenceEffectCoverage */
-/** @typedef {import('./consumption.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
-/** @typedef {import('./population.js').PopulationLevel} PopulationLevel */
-/** @typedef {import('./population.js').ResidenceBuilding} ResidenceBuilding */
-/** @typedef {import('./population.js').Workforce} Workforce */
+// NOTE: In TypeScript, use 'import type { ... } from ...' or direct type imports instead of @typedef JSDoc comments.
+// /** @typedef {import('./world.ts').Island} Island */
+// /** @typedef {import('./world.ts').Region} Region */
+// /** @typedef {import('./world.ts').Session} Session */
+// /** @typedef {import('./factories.ts').Consumer} Consumer */
+// /** @typedef {import('./factories.ts').Factory} Factory */
+// /** @typedef {import('./production.ts').Demand} Demand */
+// /** @typedef {import('./consumption.ts').Need} Need */
+// /** @typedef {import('./consumption.ts').PopulationNeed} PopulationNeed */
+// /** @typedef {import('./consumption.ts').ResidenceEffect} ResidenceEffect */
+// /** @typedef {import('./consumption.ts').ResidenceEffectCoverage} ResidenceEffectCoverage */
+// /** @typedef {import('./consumption.ts').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
+// /** @typedef {import('./population.ts').PopulationLevel} PopulationLevel */
+// /** @typedef {import('./population.ts').ResidenceBuilding} ResidenceBuilding */
+// /** @typedef {import('./population.ts').Workforce} Workforce */
 
-/** @typedef {import('./util.js').NamedElement} NamedElement */
-/** @typedef {import('./util.js').Option} Option */
-/** @typedef {import('./util.js').DLC} DLC */
+// /** @typedef {import('./util.ts').NamedElement} NamedElement */
+// /** @typedef {import('./util.ts').Option} Option */
+// /** @typedef {import('./util.ts').DLC} DLC */
 
 
 /**

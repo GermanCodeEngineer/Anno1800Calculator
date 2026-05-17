@@ -1,15 +1,14 @@
 // @ts-check
-import { ACCURACY } from './util.js'
-import { PopulationLevel, ResidenceBuilding, Workforce } from './population.js'
-import { PopulationNeed, ResidenceEffect, ResidenceEffectCoverage } from './consumption.js'
-import { ProductCategory, Product, Demand } from './production.js'
-import { Consumer, Factory } from './factories.js'
+import { ACCURACY } from './util.ts'
+import { PopulationLevel, ResidenceBuilding, Workforce } from './population.ts'
+import { PopulationNeed, ResidenceEffect, ResidenceEffectCoverage } from './consumption.ts'
+import { ProductCategory, Product, Demand } from './production.ts'
+import { Consumer, Factory } from './factories.ts'
+import type { Need, ProductionTreeNode, TemplateAsset, TemplateParentInstance, AppWindow } from './types.ts';
 
-/** @typedef {import('./types.js').Need} Need */
-/** @typedef {import('./types.js').ProductionTreeNode} ProductionTreeNode */
-/** @typedef {import('./types.js').TemplateAsset} TemplateAsset */
-/** @typedef {import('./types.js').TemplateParentInstance} TemplateParentInstance */
-/** @typedef {import('./types.js').AppWindow} AppWindow */
+// NOTE: In TypeScript, use 'import type { ... } from ...' or direct type imports instead of @typedef JSDoc comments.
+// /** @typedef {import('./types.ts').Need} Need */
+// ...existing code...
 
 var ko = require( "knockout" );
 

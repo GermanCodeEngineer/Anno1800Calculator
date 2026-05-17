@@ -1,13 +1,13 @@
 // @ts-check
-import { EPSILON, createFloatInput, NamedElement, Option } from './util.js'
-import { Demand } from './production.js'
-import { PopulationLevel, ResidenceBuilding } from './population.js';
+import { EPSILON, createFloatInput, NamedElement, Option } from './util.ts'
+import { Demand } from './production.ts'
+import { PopulationLevel, ResidenceBuilding } from './population.ts';
 
-/** @typedef {import('./types.js').AssetsMap} AssetsMap */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').Island} Island */
-/** @typedef {import('./types.js').ListObject} ListObject */
-/** @typedef {import('./types.js').AppWindow} AppWindow */
+/** @typedef {import('./types.ts').AssetsMap} AssetsMap */
+/** @typedef {import('./types.ts').ConfigObject} ConfigObject */
+/** @typedef {import('./types.ts').Island} Island */
+/** @typedef {import('./types.ts').ListObject} ListObject */
+/** @typedef {import('./types.ts').AppWindow} AppWindow */
 
 /** @typedef {{ articleEffects: Array<{ ArticleValue: number }>, guid: string }} NewspaperEntryConfig */
 /** @typedef {{ guid: string|number, residents: number, consumptionModifier: number, suppliedBy: Array<string|number> }} ResidenceEffectEntryData */

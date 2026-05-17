@@ -1,12 +1,12 @@
 // @ts-check
-import { ACCURACY, EPSILON, createIntInput, createFloatInput, NamedElement } from './util.js'
-import { Workforce, WorkforceDemand } from './population.js'
-import { ExtraGoodProductionList, Demand} from './production.js'
-import { TradeList, ContractList } from './trade.js'
+import { ACCURACY, EPSILON, createIntInput, createFloatInput, NamedElement } from './util.ts'
+import { Workforce, WorkforceDemand } from './population.ts'
+import { ExtraGoodProductionList, Demand} from './production.ts'
+import { TradeList, ContractList } from './trade.ts'
 
-/** @typedef {import('./types.js').AssetsMap} AssetsMap */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').Island} Island */
+/** @typedef {import('./types.ts').AssetsMap} AssetsMap */
+/** @typedef {import('./types.ts').ConfigObject} ConfigObject */
+/** @typedef {import('./types.ts').Island} Island */
 
 var ko = require("knockout");
 
@@ -129,9 +129,9 @@ export class Consumer extends NamedElement {
                     this.workforceDemand.updateWorkforce(items[0].replacingWorkforce)
                 else
                     this.workforceDemand.updateWorkforce(null);
-                    
 
-                
+
+
                 });
                 this.buildings.subscribe(val => this.workforceDemand.updateAmount(Math.max(val, this.buildings())));
             }
@@ -419,7 +419,7 @@ export class Factory extends Consumer {
         });
 
         this.outputAmount = ko.pureComputed(() => {
-            var diff = Math.max(this.inputAmountByExtraGoods() * this.extraGoodFactor(), 
+            var diff = Math.max(this.inputAmountByExtraGoods() * this.extraGoodFactor(),
                 this.totalDemands() - this.externalProduction(),
                 this.useinputAmountByExistingBuildings() ? this.inputAmountByExistingBuildings() * this.extraGoodFactor() : 0);
             return diff > EPSILON ? diff : 0;
@@ -440,7 +440,7 @@ export class Factory extends Consumer {
         this.useInputAmountByExistingBuildingsSubscription = ko.computed(() => {
             this.useinputAmountByExistingBuildings(this.editable() || view.settings.utilizeExistingFactories.checked());
         });
-        
+
 
         if (this.workforceDemand)
             this.buildings.subscribe(val => this.workforceDemand.updateAmount(Math.max(val, this.buildings())));

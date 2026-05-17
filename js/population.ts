@@ -1,18 +1,9 @@
 // @ts-check
-import { ACCURACY, EPSILON, delayUpdate, createIntInput, createFloatInput, NamedElement } from './util.js'
-import { MetaProduct, NoFactoryProduct, Product } from './production.js'
-import { NoFactoryNeed, PopulationNeed, PublicBuildingNeed, ResidenceEffectCoverage, ResidenceEffectEntryCoverage, ResidenceNeed } from './consumption.js'
-import { ResidenceEffectView} from './views.js'
-
-/** @typedef {import('./types.js').AssetsMap} AssetsMap */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').Demand} Demand */
-/** @typedef {import('./types.js').Island} Island */
-/** @typedef {import('./types.js').JsonObject} JsonObject */
-/** @typedef {import('./types.js').Need} Need */
-/** @typedef {import('./types.js').NewspaperNeedConsumptionEntry} NewspaperNeedConsumptionEntry */
-/** @typedef {import('./types.js').ResidenceEffect} ResidenceEffect */
-/** @typedef {import('./types.js').Session} Session */
+import { ACCURACY, EPSILON, delayUpdate, createIntInput, createFloatInput, NamedElement } from './util.ts'
+import { MetaProduct, NoFactoryProduct, Product } from './production.ts'
+import { NoFactoryNeed, PopulationNeed, PublicBuildingNeed, ResidenceEffectCoverage, ResidenceEffectEntryCoverage, ResidenceNeed } from './consumption.ts'
+import { ResidenceEffectView} from './views.ts'
+import type { AssetsMap, ConfigObject, Demand, Island, JsonObject, Need, NewspaperNeedConsumptionEntry, ResidenceEffect, Session } from './types.ts';
 
 var ko = require( "knockout" );
 

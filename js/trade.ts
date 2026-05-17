@@ -1,11 +1,12 @@
 // @ts-check
-import { ACCURACY, ALL_ISLANDS, createIntInput, createFloatInput, NamedElement, EPSILON } from './util.js'
-import { Product } from './production.js'
-import { Factory } from './factories.js'
+import { ACCURACY, ALL_ISLANDS, createIntInput, createFloatInput, NamedElement, EPSILON } from './util.ts'
+import { Product } from './production.ts'
+import { Factory } from './factories.ts'
+import type { ConfigObject, Island, ListObject } from './types.ts';
 
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').Island} Island */
-/** @typedef {import('./types.js').ListObject} ListObject */
+// NOTE: In TypeScript, use 'import type { ... } from ...' or direct type imports instead of @typedef JSDoc comments.
+// /** @typedef {import('./types.ts').ConfigObject} ConfigObject */
+// ...existing code...
 
 var ko = require( "knockout" );
 

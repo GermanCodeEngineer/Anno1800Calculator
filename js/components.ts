@@ -1,18 +1,18 @@
 // @ts-check
-import { PopulationNeed } from './consumption.js';
-import { Consumer } from './factories.js';
-import { NumberInputHandler, EPSILON } from './util.js'
+import { PopulationNeed } from './consumption.ts';
+import { Consumer } from './factories.ts';
+import { NumberInputHandler, EPSILON } from './util.ts'
 
-/** @typedef {import('./types.js').AssetIconModel} AssetIconModel */
-/** @typedef {import('./types.js').ComponentInfo} ComponentInfo */
-/** @typedef {import('./types.js').Demand} Demand */
-/** @typedef {import('./types.js').AppView} AppView */
-/** @typedef {import('./types.js').ExistingBuildingsAsset} ExistingBuildingsAsset */
-/** @typedef {import('./types.js').ParamsObject} ParamsObject */
-/** @typedef {import('./types.js').ResidenceBuilding} ResidenceBuilding */
-/** @typedef {import('./types.js').AppWindow} AppWindow */
-/** @typedef {import('./types.js').WithPropertiesBindingContext} WithPropertiesBindingContext */
-/** @typedef {import('./types.js').WithPropertiesValueAccessor} WithPropertiesValueAccessor */
+/** @typedef {import('./types.ts').AssetIconModel} AssetIconModel */
+/** @typedef {import('./types.ts').ComponentInfo} ComponentInfo */
+/** @typedef {import('./types.ts').Demand} Demand */
+/** @typedef {import('./types.ts').AppView} AppView */
+/** @typedef {import('./types.ts').ExistingBuildingsAsset} ExistingBuildingsAsset */
+/** @typedef {import('./types.ts').ParamsObject} ParamsObject */
+/** @typedef {import('./types.ts').ResidenceBuilding} ResidenceBuilding */
+/** @typedef {import('./types.ts').AppWindow} AppWindow */
+/** @typedef {import('./types.ts').WithPropertiesBindingContext} WithPropertiesBindingContext */
+/** @typedef {import('./types.ts').WithPropertiesValueAccessor} WithPropertiesValueAccessor */
 /** @typedef {{ obs: KnockoutObservable<number|string>, id: string|number }} NumberInputParams */
 
 /** @typedef {{ asset: AssetIconModel }} AssetIconViewModel */
@@ -385,7 +385,7 @@ koComponents.register('collapsible', {
                         <span data-bind="text:heading"></span>
                     </label>
                 </span>
-                <!-- /ko -->   
+                <!-- /ko -->
             </legend>
             <div class="collapse" data-bind="attr: {'id' : collapser.id}, class: cssClass">
                 <!-- ko template: { nodes: $componentTemplateNodes, data: data } --><!-- /ko -->

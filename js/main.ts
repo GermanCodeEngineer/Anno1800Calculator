@@ -1,22 +1,22 @@
-import { ACCURACY, isPreview, formatNumber, formatPercentage, versionCalculator, NamedElement, Option, DLC } from './util.js'
-import { languageCodes, texts as locaTexts, options, serverOptions } from './i18n.js'
+import { ACCURACY, isPreview, formatNumber, formatPercentage, versionCalculator, NamedElement, Option, DLC } from './util.ts'
+import { languageCodes, texts as locaTexts, options, serverOptions } from './i18n.ts'
 
-import { PopulationLevel, ResidenceBuilding } from './population.js'
-import { NewspaperNeedConsumption, NewspaperNeedConsumptionEntry } from './consumption.js'
-import { Consumer } from './factories.js'
-import { NPCTrader, ContractUpgradeManager, TradeManager, ContractCreatorFactory } from './trade.js'
-import { Region, Session, IslandManager } from './world.js'
-import { DarkMode, ViewMode, Template, ProductionChainView, ResidenceEffectView, CollapsibleStates } from './views.js'
+import { PopulationLevel, ResidenceBuilding } from './population.ts'
+import { NewspaperNeedConsumption, NewspaperNeedConsumptionEntry } from './consumption.ts'
+import { Consumer } from './factories.ts'
+import { NPCTrader, ContractUpgradeManager, TradeManager, ContractCreatorFactory } from './trade.ts'
+import { Region, Session, IslandManager } from './world.ts'
+import { DarkMode, ViewMode, Template, ProductionChainView, ResidenceEffectView, CollapsibleStates } from './views.ts'
 
-import './components.js'
-import './params.js'
+import './components.ts'
+import './params.ts'
 
 var ko = require("knockout");
 require("knockout-amd-helpers");
 
 // @ts-check
 
-/** @typedef {import('./types.js').AppWindow} AppWindow */
+/** @typedef {import('./types.ts').AppWindow} AppWindow */
 
 var moduleContext = require.context(".", true);
 var templateContext = require.context("../templates", true);
@@ -233,7 +233,7 @@ function installImportConfigListener() {
                             let islandNames = JSON.stringify(view.islands().filter(i => !i.isAllIslands()).map(i => i.name()));
                             localStorage.setItem("islandNames", islandNames);
                         }
-                        
+
                         location.reload();
 
                     } else {

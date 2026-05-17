@@ -1,12 +1,6 @@
 // @ts-check
-import { EPSILON, NamedElement, Option } from './util.js'
-
-/** @typedef {import('./types.js').AssetsMap} AssetsMap */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').Factory} Factory */
-/** @typedef {import('./types.js').Need} Need */
-/** @typedef {import('./types.js').PopulationNeed} PopulationNeed */
-/** @typedef {import('./types.js').Region} Region */
+import { EPSILON, NamedElement, Option } from './util.ts';
+import type { AssetsMap, ConfigObject, Factory, Need, PopulationNeed, Region } from './types.ts';
 
 var ko = require( "knockout" );
 

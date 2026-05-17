@@ -1,10 +1,8 @@
-// @ts-check
+import type { AssetsMap, ConfigObject, InputTransformCallback, ParamsObject, AppWindow } from './types.ts';
 
-/** @typedef {import('./types.js').AssetsMap} AssetsMap */
-/** @typedef {import('./types.js').ConfigObject} ConfigObject */
-/** @typedef {import('./types.js').InputTransformCallback} InputTransformCallback */
-/** @typedef {import('./types.js').ParamsObject} ParamsObject */
-/** @typedef {import('./types.js').AppWindow} AppWindow */
+// NOTE: In TypeScript, use 'import type { ... } from ...' or direct type imports instead of @typedef JSDoc comments.
+// /** @typedef {import('./types.ts').AssetsMap} AssetsMap */
+// ...existing code...
 /** @typedef {ConfigObject & { iconPath?: string, dlcs?: Array<string|number|DLC>, locaText?: Record<string, string>, icon?: string, available?: unknown, dlcLockingObservables?: Array<KnockoutObservable<unknown>>, name?: string|(() => string) }} NamedElementConfig */
 /** @typedef {{ obs: KnockoutObservable<number|string>, id: string|number }} NumberInputParams */
 /** @typedef {{ max?: number, min?: number, step?: number, length?: number, on: (event: string, handler: (evt: unknown) => void) => void, get: (index: number) => unknown, attr: (name: string) => string|undefined }} NumberInputElement */
