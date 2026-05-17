@@ -266,13 +266,20 @@ nav {
     }
 
 .ui-fchain-item-tr-button {
-    margin-left: calc(100% - 1.25rem);
+    margin-left: calc(100% - 1.5rem);
 }
 
     .ui-fchain-item-tr-button div {
         position: absolute;
         margin-top: -10px;
     }
+
+        .ui-fchain-item-tr-button div.ui-fchain-item-tr-button-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: flex-end;
+        }
 
         .ui-fchain-item-tr-button div .btn-light {
             background-color: rgba(248, 249, 250, 0.5);
@@ -282,6 +289,11 @@ nav {
         .ui-fchain-item-tr-button div .btn-dark {
             background-color: rgba(52, 58, 64, 0.5);
             border-color: rgba(52, 58, 64, 0.5);
+        }
+
+        .ui-fchain-item-tr-button div .ui-fchain-item-wiki-link {
+            padding: 0.12rem 0.22rem;
+            line-height: 1;
         }
 
 .ui-fchain-item-tr-checkbox {

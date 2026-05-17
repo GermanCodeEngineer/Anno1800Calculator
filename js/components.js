@@ -60,13 +60,46 @@ ko.components.register('factory-header', {
         this.$data = params.data;
         this.hasButton = params.button;
         this.$root = window.view;
+        this.englishName = ko.pureComputed(() => {
+            if (this.$data && this.$data.locaText && this.$data.locaText.english)
+                return this.$data.locaText.english;
+
+            if (this.$data && typeof this.$data.name === "function")
+                return this.$data.name();
+
+            return this.$data && this.$data.name ? this.$data.name : null;
+        });
+
+        this.wikiUrl = ko.pureComputed(() => {
+            var englishName = this.englishName();
+            if (!englishName)
+                return null;
+
+            var words = englishName.match(/[A-Za-z0-9]+/g);
+            if (!words || !words.length)
+                return null;
+
+            var pascalSnakeCaseName = words
+                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                .join('_');
+
+            return `https://anno1800.fandom.com/wiki/${pascalSnakeCaseName}`;
+        });
+
+        this.wikiTitle = ko.pureComputed(() => {
+            var englishName = this.englishName();
+            return englishName ? `Open ${englishName} on Wiki` : 'Open on Wiki';
+        });
     },
     template:
-        `<div class="ui-fchain-item-tr-button" data-bind="if: hasButton">
-            <div>
-                <button class="btn btn-light btn-sm" data-bind="click: () => {$root.selectedFactory($data.instance())}" data-toggle="modal" data-target="#factory-config-dialog">
+        `<div class="ui-fchain-item-tr-button" data-bind="visible: wikiUrl() || hasButton">
+            <div class="ui-fchain-item-tr-button-inner">
+                <button class="btn btn-light btn-sm" data-bind="visible: hasButton, click: () => {$root.selectedFactory($data.instance())}" data-toggle="modal" data-target="#factory-config-dialog">
                     <span class="fa fa-sliders"></span>
                 </button>
+                <a class="btn btn-light btn-sm ui-fchain-item-wiki-link" target="_blank" rel="noopener noreferrer" data-bind="visible: wikiUrl, attr: { href: wikiUrl, title: wikiTitle }">
+                    <span class="fa fa-external-link"></span>
+                </a>
             </div>
         </div>
 
