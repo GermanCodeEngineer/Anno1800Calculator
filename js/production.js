@@ -22,16 +22,9 @@ export class Product extends NamedElement {
 
         this.factories = this.producers.map(p => assetsMap.get(p)).filter(p => !!p);
         this.availableFactories = ko.pureComputed(() => this.factories.filter(f => f.available()));
-
         this.fixedFactory = ko.observable(null);
         if (this.mainFactory)
             this.mainFactory = assetsMap.get(this.mainFactory);
-
-        if (this.producers && this.factories.length) {
-            //this.amount = ko.computed(() => this.factories.map(f => f.outputAmount()).reduce((a, b) => a + b));
-            //this.lockDLCIfSet(this.amount); // if routes sum up to exactly zero, usage might still end up at 0.
-        }
-
         this.visible = ko.pureComputed(() => this.available());
     }
 }

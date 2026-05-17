@@ -34,13 +34,13 @@ export class Need extends Demand {
 export class ResidenceNeed {
     /**
      * @param {ResidenceBuilding} residence
-    * @param {PopulationNeed} need
+     * @param {PopulationNeed} need
      */
     constructor(residence, need) {
         this.residence = residence;
         this.need = /** @type {PopulationNeed & {guid: number|string, tpmin: number, checked: () => boolean, addResidenceNeed: (need: ResidenceNeed) => void, isInactive: () => boolean, banned: () => boolean}} */ (/** @type {unknown} */ (need));
         const typedResidence = /** @type {ResidenceBuilding & {consumingLimit: () => number}} */ (/** @type {unknown} */ (this.residence));
-        
+
         this.substitution = ko.observable(0);
         this.fulfillment = ko.observable(this.need.checked() ? 1 : 0);
 
@@ -83,7 +83,7 @@ export class ResidenceNeed {
                 return; // no effect for this product
             if (!this.residenceNeedsMap)
                 return;
-            
+
             var suppliedByFulfillment = 0;
             var modifier = 0;
             for (var c of arr){
@@ -124,16 +124,11 @@ export class PublicBuildingNeed extends Option {
     constructor(config, level, assetsMap) {
         super(config);
 
-        const self = /** @type {this & { guid: string|number, level: PopulationLevel, product: any, checked: KnockoutObservable<boolean> }} */ (this);
-
-        self.level = /** @type {any} */ (level);
-
-        self.checked(true);
-
-        self.product = /** @type {any} */ (assetsMap.get(Number(self.guid)));
-        if (!self.product)
-            throw `No Product ${self.guid}`;
-
+        this.level = level;
+        this.checked(true);
+        this.product = assetsMap.get(Number(this.guid));
+        if (!this.product)
+            throw `No Product ${this.guid}`;
         PopulationNeed.prototype.initHidden.bind(this)(assetsMap);
         this.initBans = PopulationNeed.prototype.initBans;
     }
@@ -147,22 +142,16 @@ export class NoFactoryNeed extends PublicBuildingNeed {
      */
     constructor(config, level, assetsMap) {
         super(config, level, assetsMap);
-        const self = /** @type {this & { level: PopulationLevel, isNoFactoryNeed: boolean, amount: KnockoutObservable<number>, residentsInputFactor: number, factor?: number, residentsInput?: KnockoutComputed<number>, product: { addNeed: (need: unknown) => void } }} */ (this);
-        self.level = /** @type {any} */ (level);
-        self.isNoFactoryNeed = true;
-
-        self.amount = ko.observable(0);
-        if (self.factor == null)
-            self.factor = 1;
-       
-
-        self.residentsInput = ko.pureComputed(() => {
-            return self.amount() * self.residentsInputFactor;
+        this.level = level;
+        this.isNoFactoryNeed = true;
+        this.amount = ko.observable(0);
+        if (this.factor == null)
+            this.factor = 1;
+        this.residentsInput = ko.pureComputed(() => {
+            return this.amount() * this.residentsInputFactor;
         });
-
         PopulationNeed.prototype.initAggregation.bind(this)(assetsMap);
-
-        self.product.addNeed(this);
+        this.product.addNeed(this);
     }
 }
 
@@ -174,13 +163,10 @@ export class PopulationNeed extends Need {
      */
     constructor(config, level, assetsMap) {
         super(config, assetsMap);
-        const self = /** @type {this & { level: PopulationLevel & { guid: string|number, residence: any, residents: () => number, allResidences: Array<any> }, residentsUnlockCondition: number, unlockCondition?: { populationLevel: string|number, amount: number } }} */ (this);
-        self.level = /** @type {any} */ (level);
-
-        self.residentsUnlockCondition = 0;
-        if (self.unlockCondition && self.unlockCondition.populationLevel == Number(self.level.guid))
-            self.residentsUnlockCondition = self.unlockCondition.amount;
-
+        this.level = level;
+        this.residentsUnlockCondition = 0;
+        if (this.unlockCondition && this.unlockCondition.populationLevel == Number(this.level.guid))
+            this.residentsUnlockCondition = this.unlockCondition.amount;
         this.initHidden(assetsMap);
         this.initAggregation(assetsMap);
     }
@@ -189,40 +175,31 @@ export class PopulationNeed extends Need {
      * @param {AssetsMap} assetsMap
      */
     initHidden(assetsMap){
-        const self = /** @type {this & { available: () => boolean, banned: KnockoutObservable<boolean>, isInactive: KnockoutObservable<boolean>, requiredBuildings?: Array<string|number>, residences?: Array<any>, level: PopulationLevel, residenceNeeds: KnockoutObservableArray<ResidenceNeed>, addResidenceNeed: (need: ResidenceNeed) => void, totalResidents?: KnockoutComputed<number>, hidden?: KnockoutComputed<boolean> }} */ (this);
-        self.banned = ko.observable(false);
-        self.isInactive = ko.observable(false);
-
-        if (self.requiredBuildings) {
-            self.residences = self.requiredBuildings.map((r) => assetsMap.get(Number(r)));
-
-            self.hidden = ko.computed(() => {
-                if (!self.available())
+        this.banned = ko.observable(false);
+        this.isInactive = ko.observable(false);
+        if (this.requiredBuildings) {
+            this.residences = this.requiredBuildings.map((r) => assetsMap.get(Number(r)));
+            this.hidden = ko.computed(() => {
+                if (!this.available())
                     return true;
-
-                for (var r of self.residences || [])
-                    if (r.existingBuildings() > 0 || self.level.residence == r)
+                for (let r of this.residences || [])
+                    if (r.existingBuildings() > 0 || this.level.residence == r)
                         return false;
-
                 return true;
             });
         } else {
-            self.hidden = ko.computed(() => !self.available());
-            self.residences = self.level.allResidences;
+            this.hidden = ko.computed(() => !this.available());
+            this.residences = this.level.allResidences;
         }
-
-        self.residenceNeeds = ko.observableArray(/** @type {Array<ResidenceNeed>} */ ([]));
-
-        self.addResidenceNeed = function (need) {
-            self.residenceNeeds.push(need);
-        }
-
-        self.totalResidents = ko.pureComputed(() => {
-            var sum = 0;
-            for (var n of self.residenceNeeds()) {
+        this.residenceNeeds = ko.observableArray([]);
+        this.addResidenceNeed = function (need) {
+            this.residenceNeeds.push(need);
+        };
+        this.totalResidents = ko.pureComputed(() => {
+            let sum = 0;
+            for (let n of this.residenceNeeds()) {
                 sum += n.residents();
             }
-
             return sum;
         });
     }
@@ -231,19 +208,14 @@ export class PopulationNeed extends Need {
      * @param {AssetsMap} assetsMap
      */
     initAggregation(assetsMap) {
-        const self = /** @type {this & { level: PopulationLevel, checked: KnockoutObservable<boolean>, amount: KnockoutObservable<number>, notes: KnockoutObservable<string>, region: any, residenceNeeds: KnockoutObservableArray<ResidenceNeed>, residenceNeedsSubscription?: KnockoutComputed<number> }} */ (this);
-        self.region = self.level.region;        
-
-        self.checked = ko.observable(true);
-
-        self.notes = ko.observable("");   
-
-        self.residenceNeedsSubscription = ko.computed(() => {
-            var sum = 0;
-            for (var n of self.residenceNeeds())
+        this.region = this.level.region;
+        this.checked = ko.observable(true);
+        this.notes = ko.observable("");
+        this.residenceNeedsSubscription = ko.computed(() => {
+            let sum = 0;
+            for (let n of this.residenceNeeds())
                 sum += n.amount();
-
-            self.amount(sum);
+            this.amount(sum);
             return sum;
         });
 
@@ -254,46 +226,36 @@ export class PopulationNeed extends Need {
      * @param {AssetsMap} assetsMap
      */
     initBans(level, assetsMap) {
-        const self = /** @type {this & { checked: KnockoutObservable<boolean>, banned: KnockoutObservable<boolean>, isInactive: KnockoutObservable<boolean>, locked?: KnockoutComputed<boolean>, unlockCondition?: { populationLevel: string|number, amount: number }, bannedSubscription?: KnockoutComputed<boolean> }} */ (this);
-        if (self.unlockCondition) {
-            var config = self.unlockCondition;
-            self.locked = ko.computed(() => {
+        if (this.unlockCondition) {
+            let config = this.unlockCondition;
+            this.locked = ko.computed(() => {
                 if (!config || !view.settings.needUnlockConditions.checked())
                     return false;
-
                 if (level.skyscraperLevels && level.hasSkyscrapers())
                     return false;
-
-                const levelWithGuid = /** @type {any} */ (level);
-                if (config.populationLevel != Number(levelWithGuid.guid)) {
-                    var l = /** @type {any} */ (assetsMap.get(Number(config.populationLevel)));
+                if (config.populationLevel != Number(level.guid)) {
+                    let l = assetsMap.get(Number(config.populationLevel));
                     return l.residents() < config.amount;
                 }
-
                 if (level.residents() >= config.amount)
                     return false;
-
-                var residence = /** @type {any} */ (level.residence).upgradedBuilding;
+                let residence = level.residence.upgradedBuilding;
                 while (residence) {
-                    var l = residence.populationLevel;
-                    var amount = l.residents();
+                    let l = residence.populationLevel;
+                    let amount = l.residents();
                     if (amount > 0)
                         return false;
-
                     residence = residence.upgradedBuilding;
                 }
-
                 return true;
-            }).extend({ deferred: true }); // deferred necessary for updating population level residents
-
-            self.isInactive(self.locked());
-            self.locked.subscribe((locked) => self.isInactive(locked));
+            }).extend({ deferred: true });
+            this.isInactive(this.locked());
+            this.locked.subscribe((locked) => this.isInactive(locked));
         }
-
-        self.bannedSubscription = /** @type {KnockoutComputed<boolean>} */ (/** @type {unknown} */ (ko.computed(() => {
-            var checked = self.checked();
-            return self.banned(!!(!checked || self.locked && self.locked()));
-        })));
+        this.bannedSubscription = ko.computed(() => {
+            let checked = this.checked();
+            return this.banned(!!(!checked || this.locked && this.locked()));
+        });
 
     }
 
@@ -373,7 +335,7 @@ export class NewspaperNeedConsumption {
     }
 
     apply() {
-        
+
     }
 }
 

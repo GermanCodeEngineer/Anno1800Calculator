@@ -20,37 +20,29 @@ export class Consumer extends NamedElement {
         super(config);
 
         this.island = island;
-
         if (config.region)
             this.region = assetsMap.get(config.region);
-
         this.items = [];
         this.inputDemandsMap = new Map();
         this.inputDemands = ko.observableArray([]);
         this.workforceDemand = null;
-
         this.boost = ko.observable(1);
         this.editable = ko.observable(false);
         this.existingBuildings = createIntInput(0, 0).extend({ deferred: true });
         this.lockDLCIfSet(this.existingBuildings);
-
         this.useinputAmountByExistingBuildings = ko.observable(true);
         this.inputAmountByOutput = ko.observable(0);
-
         this.inputAmountByExistingBuildings = ko.computed(() => {
             return this.existingBuildings() * this.boost() * this.tpmin;
         });
-
         this.inputAmount = ko.pureComputed(() => {
-            var amount = this.inputAmountByOutput();
+            let amount = this.inputAmountByOutput();
             if (this.useinputAmountByExistingBuildings())
                 amount = Math.max(amount, this.inputAmountByExistingBuildings());
             return amount;
         });
-
         this.buildings = ko.computed(() => this.inputAmount() / this.tpmin / this.boost()).extend({ deferred: true });
         this.lockDLCIfSet(this.buildings);
-        
         this.notes = ko.observable("");
     }
 
