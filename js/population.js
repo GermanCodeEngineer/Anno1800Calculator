@@ -1,4 +1,3 @@
-// @ts-check
 import { ACCURACY, EPSILON, delayUpdate, createIntInput, createFloatInput, NamedElement } from './util.js'
 import { MetaProduct, NoFactoryProduct, Product } from './production.js'
 import { NoFactoryNeed, PopulationNeed, PublicBuildingNeed, ResidenceEffectCoverage, ResidenceEffectEntryCoverage, ResidenceNeed } from './consumption.js'

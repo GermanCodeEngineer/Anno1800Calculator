@@ -1,4 +1,3 @@
-// @ts-check
 import { ALL_ISLANDS, setDefaultFixedFactories, NamedElement, Option } from './util.js'
 import { texts } from './i18n.js'
 

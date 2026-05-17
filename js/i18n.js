@@ -1,6 +1,4 @@
-﻿// @ts-check
-
-export let languageCodes = {
+﻿export let languageCodes = {
     'en': 'english',
     'de': 'german',
     'fr': 'french',

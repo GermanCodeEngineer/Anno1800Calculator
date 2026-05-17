@@ -1,4 +1,3 @@
-// @ts-check
 import { EPSILON, NamedElement, Option } from './util.js'
 
 var ko = require( "knockout" );

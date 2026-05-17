@@ -16,8 +16,6 @@ import './params.js'
 var ko = require("knockout");
 require("knockout-amd-helpers");
 
-// @ts-check
-
 var moduleContext = require.context(".", true);
 var templateContext = require.context("../templates", true);
 

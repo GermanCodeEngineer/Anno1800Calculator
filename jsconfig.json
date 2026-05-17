@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "checkJs": false,
+    "allowJs": true
+  },
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

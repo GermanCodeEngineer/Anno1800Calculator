@@ -1,5 +1,4 @@
-﻿// @ts-check
-import { PopulationNeed } from './consumption.js';
+﻿import { PopulationNeed } from './consumption.js';
 import { Consumer } from './factories.js';
 import { NumberInputHandler, EPSILON } from './util.js'
 

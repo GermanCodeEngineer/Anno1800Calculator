@@ -1,4 +1,3 @@
-// @ts-check
 import { ACCURACY, ALL_ISLANDS, createIntInput, createFloatInput, NamedElement, EPSILON } from './util.js'
 import { Product } from './production.js'
 import { Factory } from './factories.js'

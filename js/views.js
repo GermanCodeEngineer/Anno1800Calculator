@@ -1,4 +1,3 @@
-// @ts-check
 import { ACCURACY } from './util.js'
 import { PopulationLevel, ResidenceBuilding, Workforce } from './population.js'
 import { PopulationNeed, ResidenceEffect, ResidenceEffectCoverage } from './consumption.js'

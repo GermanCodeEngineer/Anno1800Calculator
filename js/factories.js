@@ -1,4 +1,3 @@
-// @ts-check
 import { ACCURACY, EPSILON, createIntInput, createFloatInput, NamedElement } from './util.js'
 import { Workforce, WorkforceDemand } from './population.js'
 import { ExtraGoodProductionList, Demand} from './production.js'

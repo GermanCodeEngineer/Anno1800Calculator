@@ -1,5 +1,3 @@
-// @ts-check
-
 var ko = require( "knockout" );
 
 export let versionCalculator = "v11.1";
