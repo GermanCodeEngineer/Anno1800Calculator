@@ -179,7 +179,7 @@ export class ProductionChainView {
                             'factory': consumer,
                             'buildings': amount / consumer.tpmin / consumer.boost(),
                             'children': consumer.inputDemands().map(d => traverse(d.factory(), amount))
-                        }; 
+                        };
                     }
 
                     var factory = /** @type Factory */ consumer;
@@ -193,12 +193,12 @@ export class ProductionChainView {
                     if (factory.contractList && factory.contractList.amount() > maxSubAmount){
                         maxSubAmount = factory.contractList.amount()
                         icon = "./icons/icon_docklands_2d_white.png"
-                    } 
+                    }
                     if (factory.extraGoodProductionAmount && factory.extraGoodProductionAmount() > maxSubAmount) {
                         maxSubAmount = factory.extraGoodProductionAmount()
                         icon = "./icons/icon_add_goods_socket_white.png"
-                    } 
-                    
+                    }
+
                     if(icon){
                         return {
                             'amount': amount,
@@ -214,7 +214,7 @@ export class ProductionChainView {
                         'factory': factory,
                         'buildings': inputAmount / factory.tpmin / factory.boost(),
                         'children': factory.inputDemands().map(d => traverse(d.factory(), inputAmount))
-                    };           
+                    };
 
             };
 
@@ -224,7 +224,7 @@ export class ProductionChainView {
             if (amount == null)
                 amount = this.factory().inputAmount;
             return traverse(this.factory(), amount());
-             
+
         });
 
         this.breadth = ko.pureComputed(() => {
@@ -310,8 +310,8 @@ export class ResidenceEffectView {
             })
         });
 
-        this.allEffects = [...effects];        
-        
+        this.allEffects = [...effects];
+
         this.aggregates = ko.observableArray([]);
         aggregatesMap.forEach((a, e) => {
             a.finishInitialization();

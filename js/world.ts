@@ -109,7 +109,7 @@ class LocalStorageProxy {
         this.savingScheduled = true;
         setTimeout(() => {
             this.savingScheduled = false;
-            localStorage.setItem(this.storageKey, JSON.stringify(this.json, null, 4));            
+            localStorage.setItem(this.storageKey, JSON.stringify(this.json, null, 4));
         }, 0);
     }
 }

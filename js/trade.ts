@@ -684,7 +684,7 @@ export class ContractManager {
         var c = this.existingStorageCapacity();
 
         //x = newTotalAmount / s
-        //existingStorageCapactiy = newMaxAmount * (loadingDuration + transferTime) 
+        //existingStorageCapactiy = newMaxAmount * (loadingDuration + transferTime)
         //    = newMaxAmount * (-transferTime * x/(x-1) + transferTime)
         //    = newMaxAmount * (- transferTime * (newTotalAmount / s) / ((newTotalAmount / s) - 1) + transferTime)
         //    = f * maxAmount * (- transferTime * (f * totalAmount / s) / ((f * totalAmount / s) - 1) + transferTime)
