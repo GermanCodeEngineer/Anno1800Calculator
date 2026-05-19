@@ -1,6 +1,6 @@
 import { EPSILON, NamedElement, Option } from './util.js'
 
-var ko = require( "knockout" );
+var ko = window.ko;
 
 export class Product extends NamedElement {
     constructor(config, assetsMap) {

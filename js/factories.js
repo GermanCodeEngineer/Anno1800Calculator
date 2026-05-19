@@ -3,7 +3,7 @@ import { Workforce, WorkforceDemand } from './population.js'
 import { ExtraGoodProductionList, Demand} from './production.js'
 import { TradeList, ContractList } from './trade.js'
 
-var ko = require("knockout");
+var ko = window.ko;
 
 export class Consumer extends NamedElement {
     constructor(config, assetsMap, island) {

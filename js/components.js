@@ -2,7 +2,7 @@
 import { Consumer } from './factories.js';
 import { NumberInputHandler, EPSILON } from './util.js'
 
-var ko = require("knockout");
+var ko = window.ko;
 
 ko.bindingHandlers.withProperties = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {

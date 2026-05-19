@@ -1,4 +1,4 @@
-var ko = require( "knockout" );
+var ko = window.ko;
 
 export let versionCalculator = "v11.1";
 export let isPreview = false;

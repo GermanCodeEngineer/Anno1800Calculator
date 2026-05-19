@@ -13,21 +13,13 @@ import { DarkMode, ViewMode, Template, ProductionChainView, ResidenceEffectView,
 import './components.js'
 import './params.js'
 
-var ko = require("knockout");
-require("knockout-amd-helpers");
-
-var moduleContext = require.context(".", true);
-var templateContext = require.context("../templates", true);
-
-ko.bindingHandlers.module.loader = function (moduleName, done) {
-    var mod = moduleContext("./" + moduleName);
-    done(mod);
-}
+var ko = window.ko;
 
 ko.amdTemplateEngine.defaultSuffix = ".html";
 ko.amdTemplateEngine.loader = function (templateName, done) {
-    var template = templateContext("./" + templateName + ko.amdTemplateEngine.defaultSuffix);
-    done(template.default);
+    fetch("./templates/" + templateName + ".html")
+        .then(r => r.text())
+        .then(html => done(html));
 }
 
 window.ACCURACY = ACCURACY;

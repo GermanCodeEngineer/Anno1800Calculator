@@ -3,7 +3,7 @@ import { MetaProduct, NoFactoryProduct, Product } from './production.js'
 import { NoFactoryNeed, PopulationNeed, PublicBuildingNeed, ResidenceEffectCoverage, ResidenceEffectEntryCoverage, ResidenceNeed } from './consumption.js'
 import { ResidenceEffectView} from './views.js'
 
-var ko = require( "knockout" );
+var ko = window.ko;
 
 export class ResidenceBuilding extends NamedElement {
     constructor(config, assetsMap, island) {

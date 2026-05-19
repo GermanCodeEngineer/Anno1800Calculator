@@ -4,7 +4,7 @@ import { PopulationNeed, ResidenceEffect, ResidenceEffectCoverage } from './cons
 import { ProductCategory, Product, Demand } from './production.js'
 import { Consumer, Factory } from './factories.js'
 
-var ko = require( "knockout" );
+var ko = window.ko;
 
 export class DarkMode {
     constructor() {

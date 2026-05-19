@@ -8,7 +8,7 @@ import { PublicConsumerBuilding, Module, Factory, Consumer, Buff, PowerPlant } f
 import { ContractManager } from './trade.js'
 import {ResidenceEffectView} from './views.js'
 
-var ko = require("knockout");
+var ko = window.ko;
 
 class Storage {
     /**

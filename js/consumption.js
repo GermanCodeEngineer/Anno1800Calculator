@@ -2,7 +2,7 @@ import { EPSILON, createFloatInput, NamedElement, Option } from './util.js'
 import { Demand } from './production.js'
 import { ResidenceBuilding } from './population.js';
 
-var ko = require( "knockout" );
+var ko = window.ko;
 
 
 
