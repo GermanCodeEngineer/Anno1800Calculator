@@ -183,7 +183,7 @@ function checkAndShowNotifications() {
 
 function installImportConfigListener() {
     if (localStorage) {
-        $('#config-selector').on('change', event => {
+        $(document).on('change', '#config-selector', event => {
             event.preventDefault();
             if (!event.target.files || !event.target.files[0])
                 return;

@@ -25,7 +25,7 @@
 
                 <form data-bind="submit: () => $root.islandManager.create($root.islandManager.islandNameInput(), $root.islandManager.sessionInput())">
                     <div class="input-group">
-                        <select name="session" class="form-control custom-select" id="session" data-bind="value: $root.islandManager.sessionInput, valueAllowUnset: true, options: $root.islandManager.availableSessions, optionsText: s => s.name()" />
+                        <select name="session" class="form-control custom-select" id="session" data-bind="value: $root.islandManager.sessionInput, valueAllowUnset: true, options: $root.islandManager.availableSessions, optionsText: s => s.name()"></select>
 
 
                         <input name="island" class="form-control" id="island" type="text" data-bind="value: $root.islandManager.islandNameInput" />
